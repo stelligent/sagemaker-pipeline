@@ -1,0 +1,5 @@
+{
+  "Parameters" : {
+    "SageMakerEndpointName" : "test-sagemaker-endpoint"
+  }
+}
