@@ -156,8 +156,8 @@ Resources:
                 ActionMode: REPLACE_ON_FAILURE
                 RoleArn: !GetAtt [CFNRole, Arn]
                 StackName: !Ref TestStackName
-                TemplateConfiguration: !Sub "TemplateSource::${TestStackConfig}"
-                TemplatePath: !Sub "TemplateSource::${TemplateFileName}"
+                TemplateConfiguration: !Sub "TemplateSource::CloudFormation/${TestStackConfig}"
+                TemplatePath: !Sub "TemplateSource::CloudFormation/${TemplateFileName}"
               RunOrder: '1'
         - Name: Prod
           Actions:

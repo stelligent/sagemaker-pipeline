@@ -1,5 +1,5 @@
 {
   "Parameters" : {
-    "SageMakerEndpointName" : "prod-sagemaker-endpoint"
+    "SageMakerEndpointName" : "prod-sagemaker-endpoint2"
   }
 }
