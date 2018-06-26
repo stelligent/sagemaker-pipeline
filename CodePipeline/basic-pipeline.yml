@@ -87,21 +87,21 @@ Resources:
         - Endpoint: !Ref Email
           Protocol: email
 
-S3UploadProject:
-    Type: AWS::CodeBuild::Project
-    Properties:
-      Name: !Sub sagemaker-s3-upload
-      Description: Uploads artifacts from GitHub to S3
-      ServiceRole: !GetAtt CodeBuildRole.Arn
-      Artifacts:
-        Type: CODEPIPELINE
-      Environment:
-        Type: LINUX_CONTAINER
-        ComputeType: BUILD_GENERAL1_SMALL
-        Image: aws/codebuild/ubuntu-base:14.04
-      Source:
-        Type: CODEPIPELINE
-      TimeoutInMinutes: 30
+  S3UploadProject:
+      Type: AWS::CodeBuild::Project
+      Properties:
+        Name: !Sub sagemaker-s3-upload
+        Description: Uploads artifacts from GitHub to S3
+        ServiceRole: !GetAtt CodeBuildRole.Arn
+        Artifacts:
+          Type: CODEPIPELINE
+        Environment:
+          Type: LINUX_CONTAINER
+          ComputeType: BUILD_GENERAL1_SMALL
+          Image: aws/codebuild/ubuntu-base:14.04
+        Source:
+          Type: CODEPIPELINE
+        TimeoutInMinutes: 30
 
   Pipeline:
     Type: AWS::CodePipeline::Pipeline
@@ -129,7 +129,7 @@ S3UploadProject:
               OutputArtifacts:
                 - Name: TemplateSource
               RunOrder: '1'
-        - Name: Upload to S3
+        - Name: UploadtoS3
           Actions:
             - Name: Upload
               ActionTypeId:
@@ -227,6 +227,7 @@ S3UploadProject:
             Statement:
               - Action:
                 - 's3:*'
+                - 'codebuild:*'
                 - 'cloudformation:CreateStack'
                 - 'cloudformation:DescribeStacks'
                 - 'cloudformation:DeleteStack'
@@ -241,30 +242,26 @@ S3UploadProject:
                 Effect: Allow
                 Resource: '*'
   CodeBuildRole:
-      Type: AWS::IAM::Role
+    Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
         Statement:
         - Action: ['sts:AssumeRole']
           Effect: Allow
           Principal:
-            Service: [codepipeline.amazonaws.com]
+            Service: [codebuild.amazonaws.com]
         Version: '2012-10-17'
       Path: /
       Policies:
-        - PolicyName: CodePipelineAccess
+        - PolicyName: UploadAccess
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
               - Action:
                 - 'codepipeline:*'
-                Effect: Allow
-                Resource: '*'
-        - PolicyName: S3Access
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Action:
                 - 's3:*'
+                - 'logs:CreateLogGroup'
+                - 'logs:CreateLogStream'
+                - 'logs:PutLogEvents'
                 Effect: Allow
                 Resource: '*'
