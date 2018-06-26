@@ -7,13 +7,6 @@ Parameters:
     Default: sagemaker-pipeline
     Description: A name for pipeline
     Type: String
-  S3Bucket:
-    Description: The name of the S3 bucket that contains the source artifact, which must be in the same region as this stack
-    Type: String
-  SourceS3Key:
-    Default: Archive.zip
-    Description: The file name of the source artifact, such as myfolder/myartifact.zip
-    Type: String
   TemplateFileName:
     Default: sagemaker.yaml
     Description: The file name of the WordPress template
@@ -37,7 +30,22 @@ Parameters:
   Email:
     Description: The email address where CodePipeline sends pipeline notifications
     Type: String
-
+  GitHubToken:
+    NoEcho: true
+    Description: Secret. It might look something like 9b189a1654643522561f7b3ebd44a1531a4287af OAuthToken with access to Repo. Go to https://github.com/settings/tokens
+    Type: String
+  GitHubUser:
+    Default: stelligent
+    Description: GitHub UserName
+    Type: String
+  Repo:
+    Default: sagemaker-pipeline
+    Description: GitHub Repo to pull from. Only the Name. not the URL
+    Type: String
+  Branch:
+    Default: master
+    Description: Branch to use from Repo. Only the Name. not the URL
+    Type: String
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -45,9 +53,14 @@ Metadata:
           default: "CodePipeline Settings"
         Parameters:
           - PipelineName
-          - S3Bucket
-          - SourceS3Key
           - Email
+      - Label:
+          default: "GitHub Settings"
+        Parameters:
+          - GitHubToken
+          - GitHubUser
+          - Repo
+          - Branch
       - Label:
           default: "Test Stack Settings"
         Parameters:
@@ -74,6 +87,22 @@ Resources:
         - Endpoint: !Ref Email
           Protocol: email
 
+S3UploadProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Sub sagemaker-s3-upload
+      Description: Uploads artifacts from GitHub to S3
+      ServiceRole: !GetAtt CodeBuildRole.Arn
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/ubuntu-base:14.04
+      Source:
+        Type: CODEPIPELINE
+      TimeoutInMinutes: 30
+
   Pipeline:
     Type: AWS::CodePipeline::Pipeline
     Properties:
@@ -84,18 +113,33 @@ Resources:
       Name: !Ref 'PipelineName'
       RoleArn: !GetAtt [PipelineRole, Arn]
       Stages:
-        - Name: S3Source
+        - Name: Source
           Actions:
-            - Name: TemplateSource
+            - Name: Source
               ActionTypeId:
                 Category: Source
-                Owner: AWS
-                Provider: S3
+                Owner: ThirdParty
+                Provider: GitHub
                 Version: '1'
               Configuration:
-                S3Bucket: !Ref 'S3Bucket'
-                S3ObjectKey: !Ref 'SourceS3Key'
+                Owner: !Ref 'GitHubUser'
+                Repo: !Ref 'Repo'
+                Branch: !Ref 'Branch'
+                OAuthToken: !Ref 'GitHubToken'
               OutputArtifacts:
+                - Name: TemplateSource
+              RunOrder: '1'
+        - Name: Upload to S3
+          Actions:
+            - Name: Upload
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: '1'
+              Configuration:
+                ProjectName: !Ref 'S3UploadProject'
+              InputArtifacts:
                 - Name: TemplateSource
               RunOrder: '1'
         - Name: QA
@@ -194,5 +238,33 @@ Resources:
                 - 'cloudformation:SetStackPolicy'
                 - 'iam:PassRole'
                 - 'sns:Publish'
+                Effect: Allow
+                Resource: '*'
+  CodeBuildRole:
+      Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: ['sts:AssumeRole']
+          Effect: Allow
+          Principal:
+            Service: [codepipeline.amazonaws.com]
+        Version: '2012-10-17'
+      Path: /
+      Policies:
+        - PolicyName: CodePipelineAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                - 'codepipeline:*'
+                Effect: Allow
+                Resource: '*'
+        - PolicyName: S3Access
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                - 's3:*'
                 Effect: Allow
                 Resource: '*'
