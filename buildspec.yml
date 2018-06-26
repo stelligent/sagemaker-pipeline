@@ -3,4 +3,4 @@ phases:
   build:
     commands:
       - ls
-      - aws s3 cp model.tar.gz s3://harlen-us-east-1/model.tar.gz
+      - aws s3 cp ./Source/model.tar.gz s3://harlen-us-east-1/model.tar.gz
