@@ -1,0 +1,198 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  AWS CloudFormation Sample Template Continuous Delievery: This template
+  builds an AWS SageMaker pipeline.
+Parameters:
+  PipelineName:
+    Default: sagemaker-pipeline
+    Description: A name for pipeline
+    Type: String
+  S3Bucket:
+    Description: The name of the S3 bucket that contains the source artifact, which must be in the same region as this stack
+    Type: String
+  SourceS3Key:
+    Default: Archive.zip
+    Description: The file name of the source artifact, such as myfolder/myartifact.zip
+    Type: String
+  TemplateFileName:
+    Default: sagemaker.yaml
+    Description: The file name of the WordPress template
+    Type: String
+  TestStackName:
+    Default: test-sagemaker-endpoint
+    Description: A name for the test WordPress stack
+    Type: String
+  TestStackConfig:
+    Default: test-stack-configuration.json
+    Description: The configuration file name for the test WordPress stack
+    Type: String
+  ProdStackName:
+    Default: prod-sagemaker-endpoint
+    Description: A name for the production WordPress stack
+    Type: String
+  ProdStackConfig:
+    Default: prod-stack-configuration.json
+    Description: The configuration file name for the production WordPress stack
+    Type: String
+  Email:
+    Description: The email address where CodePipeline sends pipeline notifications
+    Type: String
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: "CodePipeline Settings"
+        Parameters:
+          - PipelineName
+          - S3Bucket
+          - SourceS3Key
+          - Email
+      - Label:
+          default: "Test Stack Settings"
+        Parameters:
+          - TestStackName
+          - TemplateFileName
+          - TestStackConfig
+      - Label:
+          default: "Production Stack Settings"
+        Parameters:
+          - ProdStackName
+          - ProdStackConfig
+
+Resources:
+  ArtifactStoreBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      VersioningConfiguration:
+        Status: Enabled
+
+  CodePipelineSNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+        - Endpoint: !Ref Email
+          Protocol: email
+
+  Pipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      ArtifactStore:
+        Location: !Ref 'ArtifactStoreBucket'
+        Type: S3
+      DisableInboundStageTransitions: []
+      Name: !Ref 'PipelineName'
+      RoleArn: !GetAtt [PipelineRole, Arn]
+      Stages:
+        - Name: S3Source
+          Actions:
+            - Name: TemplateSource
+              ActionTypeId:
+                Category: Source
+                Owner: AWS
+                Provider: S3
+                Version: '1'
+              Configuration:
+                S3Bucket: !Ref 'S3Bucket'
+                S3ObjectKey: !Ref 'SourceS3Key'
+              OutputArtifacts:
+                - Name: TemplateSource
+              RunOrder: '1'
+        - Name: QA
+          Actions:
+            - Name: CreateStack
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: '1'
+              InputArtifacts:
+                - Name: TemplateSource
+              Configuration:
+                ActionMode: REPLACE_ON_FAILURE
+                RoleArn: !GetAtt [CFNRole, Arn]
+                StackName: !Ref TestStackName
+                TemplateConfiguration: !Sub "TemplateSource::${TestStackConfig}"
+                TemplatePath: !Sub "TemplateSource::${TemplateFileName}"
+              RunOrder: '1'
+        - Name: Prod
+          Actions:
+            - Name: ApproveTestStack
+              ActionTypeId:
+                Category: Approval
+                Owner: AWS
+                Provider: Manual
+                Version: '1'
+              Configuration:
+                NotificationArn: !Ref CodePipelineSNSTopic
+                CustomData: !Sub 'Do you want to create a change set against the production stack and delete the ${TestStackName} stack?'
+              RunOrder: '1'
+            - Name: CreateStack
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: '1'
+              InputArtifacts:
+                - Name: TemplateSource
+              Configuration:
+                ActionMode: REPLACE_ON_FAILURE
+                RoleArn: !GetAtt [CFNRole, Arn]
+                StackName: !Ref ProdStackName
+                TemplateConfiguration: !Sub "TemplateSource::${ProdStackConfig}"
+                TemplatePath: !Sub "TemplateSource::${TemplateFileName}"
+              RunOrder: '2'
+  CFNRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: ['sts:AssumeRole']
+          Effect: Allow
+          Principal:
+            Service: [cloudformation.amazonaws.com]
+        Version: '2012-10-17'
+      Path: /
+      Policies:
+        - PolicyName: CloudFormationRole
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                  - 'ec2:*'
+                  - 'sagemaker:*'
+                  - 'iam:PassRole'
+                Effect: Allow
+                Resource: '*'
+              
+  PipelineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: ['sts:AssumeRole']
+          Effect: Allow
+          Principal:
+            Service: [codepipeline.amazonaws.com]
+        Version: '2012-10-17'
+      Path: /
+      Policies:
+        - PolicyName: CodePipelineAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                - 's3:*'
+                - 'cloudformation:CreateStack'
+                - 'cloudformation:DescribeStacks'
+                - 'cloudformation:DeleteStack'
+                - 'cloudformation:UpdateStack'
+                - 'cloudformation:CreateChangeSet'
+                - 'cloudformation:ExecuteChangeSet'
+                - 'cloudformation:DeleteChangeSet'
+                - 'cloudformation:DescribeChangeSet'
+                - 'cloudformation:SetStackPolicy'
+                - 'iam:PassRole'
+                - 'sns:Publish'
+                Effect: Allow
+                Resource: '*'
