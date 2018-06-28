@@ -9,23 +9,23 @@ Parameters:
     Type: String
   TemplateFileName:
     Default: sagemaker.yaml
-    Description: The file name of the WordPress template
+    Description: The file name of the SageMaker template
     Type: String
   TestStackName:
     Default: test-sagemaker-endpoint
-    Description: A name for the test WordPress stack
+    Description: A name for the test SageMaker stack
     Type: String
   TestStackConfig:
     Default: test-stack-configuration.json
-    Description: The configuration file name for the test WordPress stack
+    Description: The configuration file name for the test SageMaker stack
     Type: String
   ProdStackName:
     Default: prod-sagemaker-endpoint
-    Description: A name for the production WordPress stack
+    Description: A name for the production SageMaker stack
     Type: String
   ProdStackConfig:
     Default: prod-stack-configuration.json
-    Description: The configuration file name for the production WordPress stack
+    Description: The configuration file name for the production SageMaker stack
     Type: String
   Email:
     Description: The email address where CodePipeline sends pipeline notifications
@@ -77,14 +77,14 @@ Resources:
   ArtifactStoreBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: ${PipelineName}-Pipeline-Bucket
+      BucketName: !Sub ${PipelineName}-pipeline-bucket
       VersioningConfiguration:
         Status: Enabled
 
   CodePipelineSNSTopic:
     Type: AWS::SNS::Topic
     Properties:
-      TopicName: !Sub ${PipelineName}-Pipeline-Topic
+      TopicName: !Sub ${PipelineName}-pipeline-topic
       Subscription:
         - Endpoint: !Ref Email
           Protocol: email
@@ -92,7 +92,7 @@ Resources:
   S3UploadProject:
       Type: AWS::CodeBuild::Project
       Properties:
-        Name: !Sub ${PipelineName}-Pipeline-S3-Upload
+        Name: !Sub ${PipelineName}-pipeline-s3-upload
         Description: Uploads artifacts from GitHub to S3
         ServiceRole: !GetAtt CodeBuildRole.Arn
         Artifacts:
@@ -214,7 +214,7 @@ Resources:
   PipelineRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ${PipelineName}-Pipeline-PipelineRole
+      RoleName: !Sub ${PipelineName}-pipeline-pipelinerole
       AssumeRolePolicyDocument:
         Statement:
         - Action: ['sts:AssumeRole']
@@ -247,7 +247,7 @@ Resources:
   CodeBuildRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ${PipelineName}-Pipeline-CodeBuildRole
+      RoleName: !Sub ${PipelineName}-pipeline-codebuildrole
       AssumeRolePolicyDocument:
         Statement:
         - Action: ['sts:AssumeRole']
