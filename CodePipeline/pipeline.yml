@@ -77,12 +77,14 @@ Resources:
   ArtifactStoreBucket:
     Type: AWS::S3::Bucket
     Properties:
+      BucketName: ${PipelineName}-Pipeline-Bucket
       VersioningConfiguration:
         Status: Enabled
 
   CodePipelineSNSTopic:
     Type: AWS::SNS::Topic
     Properties:
+      TopicName: !Sub ${PipelineName}-Pipeline-Topic
       Subscription:
         - Endpoint: !Ref Email
           Protocol: email
@@ -90,7 +92,7 @@ Resources:
   S3UploadProject:
       Type: AWS::CodeBuild::Project
       Properties:
-        Name: !Sub sagemaker-s3-upload
+        Name: !Sub ${PipelineName}-Pipeline-S3-Upload
         Description: Uploads artifacts from GitHub to S3
         ServiceRole: !GetAtt CodeBuildRole.Arn
         Artifacts:
@@ -189,6 +191,7 @@ Resources:
   CFNRole:
     Type: AWS::IAM::Role
     Properties:
+      RoleName: !Sub ${PipelineName}-Pipeline-CFNRole
       AssumeRolePolicyDocument:
         Statement:
         - Action: ['sts:AssumeRole']
@@ -211,6 +214,7 @@ Resources:
   PipelineRole:
     Type: AWS::IAM::Role
     Properties:
+      RoleName: !Sub ${PipelineName}-Pipeline-PipelineRole
       AssumeRolePolicyDocument:
         Statement:
         - Action: ['sts:AssumeRole']
@@ -243,6 +247,7 @@ Resources:
   CodeBuildRole:
     Type: AWS::IAM::Role
     Properties:
+      RoleName: !Sub ${PipelineName}-Pipeline-CodeBuildRole
       AssumeRolePolicyDocument:
         Statement:
         - Action: ['sts:AssumeRole']
