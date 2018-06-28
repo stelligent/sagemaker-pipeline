@@ -183,8 +183,8 @@ Resources:
                 ActionMode: REPLACE_ON_FAILURE
                 RoleArn: !GetAtt [CFNRole, Arn]
                 StackName: !Ref ProdStackName
-                TemplateConfiguration: !Sub "TemplateSource::${ProdStackConfig}"
-                TemplatePath: !Sub "TemplateSource::${TemplateFileName}"
+                TemplateConfiguration: !Sub "TemplateSource::CloudFormation/${ProdStackConfig}"
+                TemplatePath: !Sub "TemplateSource::CloudFormation/${TemplateFileName}"
               RunOrder: '2'
   CFNRole:
     Type: AWS::IAM::Role
@@ -203,9 +203,8 @@ Resources:
             Version: '2012-10-17'
             Statement:
               - Action:
-                  - 'ec2:*'
-                  - 'sagemaker:*'
-                  - 'iam:PassRole'
+                  - sagemaker:*
+                  - iam:PassRole
                 Effect: Allow
                 Resource: '*'
               
@@ -226,19 +225,19 @@ Resources:
             Version: '2012-10-17'
             Statement:
               - Action:
-                - 's3:*'
-                - 'codebuild:*'
-                - 'cloudformation:CreateStack'
-                - 'cloudformation:DescribeStacks'
-                - 'cloudformation:DeleteStack'
-                - 'cloudformation:UpdateStack'
-                - 'cloudformation:CreateChangeSet'
-                - 'cloudformation:ExecuteChangeSet'
-                - 'cloudformation:DeleteChangeSet'
-                - 'cloudformation:DescribeChangeSet'
-                - 'cloudformation:SetStackPolicy'
-                - 'iam:PassRole'
-                - 'sns:Publish'
+                - s3:*
+                - codebuild:*
+                - cloudformation:CreateStack
+                - cloudformation:DescribeStacks
+                - cloudformation:DeleteStack
+                - cloudformation:UpdateStack
+                - cloudformation:CreateChangeSet
+                - cloudformation:ExecuteChangeSet
+                - cloudformation:DeleteChangeSet
+                - cloudformation:DescribeChangeSet
+                - cloudformation:SetStackPolicy
+                - iam:PassRole
+                - sns:Publish
                 Effect: Allow
                 Resource: '*'
   CodeBuildRole:
@@ -258,10 +257,10 @@ Resources:
             Version: '2012-10-17'
             Statement:
               - Action:
-                - 'codepipeline:*'
-                - 's3:*'
-                - 'logs:CreateLogGroup'
-                - 'logs:CreateLogStream'
-                - 'logs:PutLogEvents'
+                - codepipeline:*
+                - s3:*
+                - logs:CreateLogGroup
+                - logs:CreateLogStream
+                - logs:PutLogEvents
                 Effect: Allow
                 Resource: '*'
