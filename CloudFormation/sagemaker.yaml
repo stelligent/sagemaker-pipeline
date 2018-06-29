@@ -1,11 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: 'AWS SageMaker Endpoint'
-Parameters:
-  SageMakerEndpointName:
-    Description: SageMaker endpoint name
-    MaxLength: '64'
-    MinLength: '1'
-    Type: String
 Resources:
   Model:
     Type: "AWS::SageMaker::Model"
