@@ -90,7 +90,7 @@ Resources:
                 Branch: !Ref 'Branch'
                 OAuthToken: !Ref 'GitHubToken'
               OutputArtifacts:
-                - Name: TemplateSource
+                - Name: src
               RunOrder: '1'
         - Name: UploadArtifacts
           Actions:
@@ -103,7 +103,7 @@ Resources:
               Configuration:
                 ProjectName: !Ref 'S3UploadProject'
               InputArtifacts:
-                - Name: TemplateSource
+                - Name: src
               RunOrder: '1'
         - Name: QA
           Actions:
@@ -114,12 +114,12 @@ Resources:
                 Provider: CloudFormation
                 Version: '1'
               InputArtifacts:
-                - Name: TemplateSource
+                - Name: src
               Configuration:
                 ActionMode: REPLACE_ON_FAILURE
                 RoleArn: !GetAtt [CFNRole, Arn]
                 StackName: !Sub qa-${AWS::StackName}-sagemaker-endpoint
-                TemplatePath: !Sub "TemplateSource::CloudFormation/sagemaker.yaml"
+                TemplatePath: !Sub "src::CloudFormation/sagemaker.yaml"
               RunOrder: '1'
         - Name: Production
           Actions:
@@ -140,12 +140,12 @@ Resources:
                 Provider: CloudFormation
                 Version: '1'
               InputArtifacts:
-                - Name: TemplateSource
+                - Name: src
               Configuration:
                 ActionMode: REPLACE_ON_FAILURE
                 RoleArn: !GetAtt [CFNRole, Arn]
                 StackName: !Sub prod-${AWS::StackName}-sagemaker-endpoint
-                TemplatePath: !Sub "TemplateSource::CloudFormation/sagemaker.yaml"
+                TemplatePath: !Sub "src::CloudFormation/sagemaker.yaml"
               RunOrder: '2'
   CFNRole:
     Type: AWS::IAM::Role
