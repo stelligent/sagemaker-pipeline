@@ -3,30 +3,6 @@ Description: >
   AWS CloudFormation Sample Template Continuous Delievery: This template
   builds an AWS SageMaker pipeline.
 Parameters:
-  PipelineName:
-    Default: sagemaker-pipeline
-    Description: A name for pipeline
-    Type: String
-  TemplateFileName:
-    Default: sagemaker.yaml
-    Description: The file name of the SageMaker template
-    Type: String
-  TestStackName:
-    Default: test-sagemaker-endpoint
-    Description: A name for the test SageMaker stack
-    Type: String
-  TestStackConfig:
-    Default: test-stack-configuration.json
-    Description: The configuration file name for the test SageMaker stack
-    Type: String
-  ProdStackName:
-    Default: prod-sagemaker-endpoint
-    Description: A name for the production SageMaker stack
-    Type: String
-  ProdStackConfig:
-    Default: prod-stack-configuration.json
-    Description: The configuration file name for the production SageMaker stack
-    Type: String
   Email:
     Description: The email address where CodePipeline sends pipeline notifications
     Type: String
@@ -50,41 +26,26 @@ Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
-          default: "CodePipeline Settings"
+          default: "Stack Settings"
         Parameters:
-          - PipelineName
           - Email
-      - Label:
-          default: "GitHub Settings"
-        Parameters:
           - GitHubToken
           - GitHubUser
           - Repo
           - Branch
-      - Label:
-          default: "Test Stack Settings"
-        Parameters:
-          - TestStackName
-          - TemplateFileName
-          - TestStackConfig
-      - Label:
-          default: "Production Stack Settings"
-        Parameters:
-          - ProdStackName
-          - ProdStackConfig
 
 Resources:
   ArtifactStoreBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub ${PipelineName}-pipeline-bucket
+      BucketName: !Sub ${AWS::StackName}-pipeline-bucket
       VersioningConfiguration:
         Status: Enabled
 
   CodePipelineSNSTopic:
     Type: AWS::SNS::Topic
     Properties:
-      TopicName: !Sub ${PipelineName}-pipeline-topic
+      TopicName: !Sub ${AWS::StackName}-pipeline-topic
       Subscription:
         - Endpoint: !Ref Email
           Protocol: email
@@ -92,7 +53,7 @@ Resources:
   S3UploadProject:
       Type: AWS::CodeBuild::Project
       Properties:
-        Name: !Sub ${PipelineName}-pipeline-s3-upload
+        Name: !Sub ${AWS::StackName}-pipeline-s3-upload
         Description: Uploads artifacts from GitHub to S3
         ServiceRole: !GetAtt CodeBuildRole.Arn
         Artifacts:
@@ -112,7 +73,7 @@ Resources:
         Location: !Ref 'ArtifactStoreBucket'
         Type: S3
       DisableInboundStageTransitions: []
-      Name: !Ref 'PipelineName'
+      Name: !Ref 'AWS::StackName'
       RoleArn: !GetAtt [PipelineRole, Arn]
       Stages:
         - Name: Source
@@ -131,9 +92,9 @@ Resources:
               OutputArtifacts:
                 - Name: TemplateSource
               RunOrder: '1'
-        - Name: UploadtoS3
+        - Name: UploadArtifacts
           Actions:
-            - Name: Upload
+            - Name: UploadtoS3
               ActionTypeId:
                 Category: Build
                 Owner: AWS
@@ -146,7 +107,7 @@ Resources:
               RunOrder: '1'
         - Name: QA
           Actions:
-            - Name: CreateStack
+            - Name: LaunchEndpoint
               ActionTypeId:
                 Category: Deploy
                 Owner: AWS
@@ -157,13 +118,12 @@ Resources:
               Configuration:
                 ActionMode: REPLACE_ON_FAILURE
                 RoleArn: !GetAtt [CFNRole, Arn]
-                StackName: !Ref TestStackName
-                TemplateConfiguration: !Sub "TemplateSource::CloudFormation/${TestStackConfig}"
-                TemplatePath: !Sub "TemplateSource::CloudFormation/${TemplateFileName}"
+                StackName: !Sub qa-${AWS::StackName}-sagemaker-endpoint
+                TemplatePath: !Sub "TemplateSource::CloudFormation/sagemaker.yml"
               RunOrder: '1'
-        - Name: Prod
+        - Name: Production
           Actions:
-            - Name: ApproveTestStack
+            - Name: ApprovalGate
               ActionTypeId:
                 Category: Approval
                 Owner: AWS
@@ -171,9 +131,9 @@ Resources:
                 Version: '1'
               Configuration:
                 NotificationArn: !Ref CodePipelineSNSTopic
-                CustomData: !Sub 'Do you want to create a change set against the production stack and delete the ${TestStackName} stack?'
+                CustomData: !Sub 'Do you want to push your changes to production?'
               RunOrder: '1'
-            - Name: CreateStack
+            - Name: LaunchEndpoint
               ActionTypeId:
                 Category: Deploy
                 Owner: AWS
@@ -184,14 +144,13 @@ Resources:
               Configuration:
                 ActionMode: REPLACE_ON_FAILURE
                 RoleArn: !GetAtt [CFNRole, Arn]
-                StackName: !Ref ProdStackName
-                TemplateConfiguration: !Sub "TemplateSource::CloudFormation/${ProdStackConfig}"
-                TemplatePath: !Sub "TemplateSource::CloudFormation/${TemplateFileName}"
+                StackName: !Sub prod-${AWS::StackName}-sagemaker-endpoint
+                TemplatePath: !Sub "TemplateSource::CloudFormation/sagemaker.yml"
               RunOrder: '2'
   CFNRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ${PipelineName}-Pipeline-CFNRole
+      RoleName: !Sub ${AWS::StackName}-pipeline-cfn-role
       AssumeRolePolicyDocument:
         Statement:
         - Action: ['sts:AssumeRole']
@@ -214,7 +173,7 @@ Resources:
   PipelineRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ${PipelineName}-pipeline-pipelinerole
+      RoleName: !Sub ${AWS::StackName}-pipeline-pipeline-role
       AssumeRolePolicyDocument:
         Statement:
         - Action: ['sts:AssumeRole']
@@ -247,7 +206,7 @@ Resources:
   CodeBuildRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ${PipelineName}-pipeline-codebuildrole
+      RoleName: !Sub ${AWS::StackName}-pipeline-codebuild-role
       AssumeRolePolicyDocument:
         Statement:
         - Action: ['sts:AssumeRole']

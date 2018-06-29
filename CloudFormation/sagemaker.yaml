@@ -24,7 +24,7 @@ Resources:
     Type: "AWS::SageMaker::Endpoint"
     DependsOn: EndpointConfig
     Properties:
-      EndpointName: !Ref SageMakerEndpointName
+      EndpointName: !Sub ${AWS::StackName}-Endpoint
       EndpointConfigName: !GetAtt EndpointConfig.EndpointConfigName
   EndpointConfig:
     Type: "AWS::SageMaker::EndpointConfig"
