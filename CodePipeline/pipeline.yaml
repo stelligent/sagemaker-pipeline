@@ -38,7 +38,14 @@ Resources:
   ArtifactStoreBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub ${AWS::StackName}-pipeline-bucket
+      BucketName: !Sub ${AWS::StackName}-pipeline-artifact-store
+      VersioningConfiguration:
+        Status: Enabled
+  
+  DataBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${AWS::StackName}-pipeline-data
       VersioningConfiguration:
         Status: Enabled
 
@@ -51,30 +58,30 @@ Resources:
           Protocol: email
 
   S3UploadProject:
-      Type: AWS::CodeBuild::Project
-      Properties:
-        Name: !Sub ${AWS::StackName}-pipeline-s3-upload
-        Description: Uploads artifacts from GitHub to S3
-        ServiceRole: !GetAtt CodeBuildRole.Arn
-        Artifacts:
-          Type: CODEPIPELINE
-        Environment:
-          Type: LINUX_CONTAINER
-          ComputeType: BUILD_GENERAL1_SMALL
-          Image: aws/codebuild/ubuntu-base:14.04
-        Source:
-          Type: CODEPIPELINE
-          BuildSpec:
-            version: 0.2
-            phases:
-              build:
-                commands:
-                  - zip Archive ./CloudFormation/sagemaker.yaml ./CloudFormation/test-stack-configuration.json ./CloudFormation/prod-stack-configuration.json
-                  - ls
-                  - aws s3 cp ./Source/model.tar.gz s3://harlen-us-east-1/model.tar.gz
-                  - aws s3 cp ./Source/sourcedir.tar.gz s3://harlen-us-east-1/sourcedir.tar.gz
-                  - aws s3 cp ./Archive.zip s3://harlen-us-east-1/Archive.zip
-        TimeoutInMinutes: 30
+    Type: AWS::CodeBuild::Project
+    DependsOn: DataBucket
+    Properties:
+      Name: !Sub ${AWS::StackName}-pipeline-s3-upload
+      Description: Uploads artifacts from GitHub to S3
+      ServiceRole: !GetAtt CodeBuildRole.Arn
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/ubuntu-base:14.04
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: !Sub |
+          version: 0.2
+          phases:
+            build:
+              commands:
+                - zip Archive ./CloudFormation/sagemaker.yaml
+                - aws s3 cp ./Source/model.tar.gz s3://${AWS::StackName}-pipeline-data/model.tar.gz
+                - aws s3 cp ./Source/sourcedir.tar.gz s3://${AWS::StackName}-pipeline-data/sourcedir.tar.gz
+                - aws s3 cp ./Archive.zip s3://${AWS::StackName}-pipeline-data/Archive.zip
+      TimeoutInMinutes: 30
 
   Pipeline:
     Type: AWS::CodePipeline::Pipeline

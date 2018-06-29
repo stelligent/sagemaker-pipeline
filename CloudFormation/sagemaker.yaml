@@ -6,14 +6,14 @@ Resources:
     Properties:
       ExecutionRoleArn: arn:aws:iam::324320755747:role/service-role/AmazonSageMaker-ExecutionRole-20180619T164672
       PrimaryContainer:
-        ModelDataUrl: s3://harlen-us-east-1/model.tar.gz
+        ModelDataUrl: !Sub s3://${AWS::StackName}-pipeline-data/model.tar.gz
         Image: 520713654638.dkr.ecr.us-east-1.amazonaws.com/sagemaker-tensorflow:1.6-cpu-py2
         Environment:
           SAGEMAKER_CONTAINER_LOG_LEVEL: 20
           SAGEMAKER_ENABLE_CLOUDWATCH_METRICS: false
           SAGEMAKER_PROGRAM: abalone.py
           SAGEMAKER_REGION: us-east-1
-          SAGEMAKER_SUBMIT_DIRECTORY: s3://harlen-us-east-1/sourcedir.tar.gz
+          SAGEMAKER_SUBMIT_DIRECTORY: !Sub s3://${AWS::StackName}-pipeline-data/sourcedir.tar.gz
   Endpoint:
     Type: "AWS::SageMaker::Endpoint"
     DependsOn: EndpointConfig
