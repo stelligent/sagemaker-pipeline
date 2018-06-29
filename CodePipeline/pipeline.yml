@@ -119,7 +119,7 @@ Resources:
                 ActionMode: REPLACE_ON_FAILURE
                 RoleArn: !GetAtt [CFNRole, Arn]
                 StackName: !Sub qa-${AWS::StackName}-sagemaker-endpoint
-                TemplatePath: !Sub "TemplateSource::CloudFormation/sagemaker.yml"
+                TemplatePath: !Sub "TemplateSource::CloudFormation/sagemaker.yaml"
               RunOrder: '1'
         - Name: Production
           Actions:
@@ -145,7 +145,7 @@ Resources:
                 ActionMode: REPLACE_ON_FAILURE
                 RoleArn: !GetAtt [CFNRole, Arn]
                 StackName: !Sub prod-${AWS::StackName}-sagemaker-endpoint
-                TemplatePath: !Sub "TemplateSource::CloudFormation/sagemaker.yml"
+                TemplatePath: !Sub "TemplateSource::CloudFormation/sagemaker.yaml"
               RunOrder: '2'
   CFNRole:
     Type: AWS::IAM::Role
