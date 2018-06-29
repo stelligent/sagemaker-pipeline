@@ -64,7 +64,7 @@ Resources:
           Image: aws/codebuild/ubuntu-base:14.04
         Source:
           Type: CODEPIPELINE
-          BuildSpec: !Sub |
+          BuildSpec:
             version: 0.2
             phases:
               build:
