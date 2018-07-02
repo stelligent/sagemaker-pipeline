@@ -2,7 +2,7 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: 'AWS SageMaker Endpoint'
 Parameters:
   BucketName:
-    Description: SageMaker endpoint name
+    Description: Name of data bucket
     MaxLength: '64'
     MinLength: '1'
     Type: String

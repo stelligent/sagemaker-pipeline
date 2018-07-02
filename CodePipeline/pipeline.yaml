@@ -35,7 +35,7 @@ Metadata:
           - Branch
 
 Resources:
-  PipelineBucket:
+  ArtifactStoreBucket:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Sub ${AWS::StackName}-pipeline-artifact-store
@@ -77,8 +77,7 @@ Resources:
           phases:
             build:
               commands:
-                - echo '{ "Parameters" : { "BucketName" : ${DataBucket}}}' >./CloudFormation/configuration.json
-                - zip Archive ./CloudFormation/sagemaker.yaml
+                - zip Archive ./CloudFormation/sagemaker.yaml ./CloudFormation/configuration.json
                 - aws s3 cp ./Source/model.tar.gz s3://${AWS::StackName}-pipeline-data/model.tar.gz
                 - aws s3 cp ./Source/sourcedir.tar.gz s3://${AWS::StackName}-pipeline-data/sourcedir.tar.gz
                 - aws s3 cp ./Archive.zip s3://${AWS::StackName}-pipeline-data/Archive.zip
@@ -138,6 +137,8 @@ Resources:
                 RoleArn: !GetAtt [CFNRole, Arn]
                 StackName: !Sub qa-${AWS::StackName}-sagemaker-endpoint
                 TemplatePath: !Sub "src::CloudFormation/sagemaker.yaml"
+                TemplateConfiguration: "src::Cloudformation/configuration.json"
+                ParameterOverrides: !Sub '{ "Parameters" : { "BucketName" : ${DataBucket}}}'
               RunOrder: '1'
         - Name: Production
           Actions:
@@ -164,6 +165,8 @@ Resources:
                 RoleArn: !GetAtt [CFNRole, Arn]
                 StackName: !Sub prod-${AWS::StackName}-sagemaker-endpoint
                 TemplatePath: !Sub "src::CloudFormation/sagemaker.yaml"
+                TemplateConfiguration: "src::Cloudformation/configuration.json"
+                ParameterOverrides: !Sub '{ "Parameters" : { "BucketName" : ${DataBucket}}}'
               RunOrder: '2'
 
   CFNRole:

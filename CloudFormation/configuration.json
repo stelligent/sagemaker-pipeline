@@ -1,0 +1,5 @@
+{
+    "Parameters" : {
+      "BucketName" : "data-bucket"
+    }
+  }
