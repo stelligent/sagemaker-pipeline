@@ -137,7 +137,7 @@ Resources:
                 RoleArn: !GetAtt [CFNRole, Arn]
                 StackName: !Sub qa-${AWS::StackName}-sagemaker-endpoint
                 TemplatePath: !Sub "src::CloudFormation/sagemaker.yaml"
-                TemplateConfiguration: "src::Cloudformation/configuration.json"
+                TemplateConfiguration: "src::CloudFormation/configuration.json"
                 ParameterOverrides: !Sub '{ "Parameters" : { "BucketName" : ${DataBucket}}}'
               RunOrder: '1'
         - Name: Production
@@ -165,7 +165,7 @@ Resources:
                 RoleArn: !GetAtt [CFNRole, Arn]
                 StackName: !Sub prod-${AWS::StackName}-sagemaker-endpoint
                 TemplatePath: !Sub "src::CloudFormation/sagemaker.yaml"
-                TemplateConfiguration: "src::Cloudformation/configuration.json"
+                TemplateConfiguration: "src::CloudFormation/configuration.json"
                 ParameterOverrides: !Sub '{ "Parameters" : { "BucketName" : ${DataBucket}}}'
               RunOrder: '2'
 
