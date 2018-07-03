@@ -55,6 +55,33 @@ Resources:
       Subscription:
         - Endpoint: !Ref Email
           Protocol: email
+  
+  CFNNagProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Sub ${AWS::StackName}-pipeline-cfnnag
+      Description: Lints CloudFormation
+      ServiceRole: !GetAtt CodeBuildRole.Arn
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/eb-ruby-2.3-amazonlinux-64:2.1.6
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: !Sub |
+          version: 0.2
+          phases:
+            build:
+              install:
+                commands:
+                  - set -x
+                  - gem install cfn-nag
+              build:
+                commands:
+                  - cfn_nag_scan -p .cfn_nag -i CloudFormation/*.yaml
+      TimeoutInMinutes: 30
 
   S3UploadProject:
     Type: AWS::CodeBuild::Project
@@ -110,8 +137,19 @@ Resources:
               OutputArtifacts:
                 - Name: src
               RunOrder: '1'
-        - Name: UploadModel
+        - Name: Build&Train
           Actions:
+            - Name: cfn-nag
+              ActionTypeId:
+                Category: Test
+                Owner: AWS
+                Provider: CodeBuild
+                Version: '1'
+              Configuration:
+                ProjectName: !Ref 'CFNNagProject'
+              InputArtifacts:
+                - Name: src
+              RunOrder: '1'
             - Name: UploadtoS3
               ActionTypeId:
                 Category: Build
@@ -124,7 +162,7 @@ Resources:
                 - Name: src
               OutputArtifacts:
                 - Name: bld
-              RunOrder: '1'
+              RunOrder: '2'
         - Name: QA
           Actions:
             - Name: LaunchEndpoint
@@ -263,7 +301,7 @@ Resources:
         - Action: ['sts:AssumeRole']
           Effect: Allow
           Principal:
-            Service: [codepipeline.amazonaws.com]
+            Service: [sagemaker.amazonaws.com]
         Version: '2012-10-17'
       Path: /
       ManagedPolicyArns:
