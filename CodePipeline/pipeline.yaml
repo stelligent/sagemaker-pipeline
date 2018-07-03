@@ -1,7 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: >
-  AWS CloudFormation Sample Template Continuous Delievery: This template
-  builds an AWS SageMaker pipeline.
+  CloudFormation SageMaker pipeline.
 Parameters:
   Email:
     Description: The email address where CodePipeline sends pipeline notifications
@@ -77,10 +76,12 @@ Resources:
           phases:
             build:
               commands:
-                - zip Archive ./CloudFormation/sagemaker.yaml ./CloudFormation/configuration.json
+                - echo '{ "Parameters":{"BucketName":"${DataBucket}","SageMakerRole":"${SagemakerRole}"}}' > ./CloudFormation/configuration.json
                 - aws s3 cp ./Source/model.tar.gz s3://${AWS::StackName}-pipeline-data/model.tar.gz
                 - aws s3 cp ./Source/sourcedir.tar.gz s3://${AWS::StackName}-pipeline-data/sourcedir.tar.gz
-                - aws s3 cp ./Archive.zip s3://${AWS::StackName}-pipeline-data/Archive.zip
+          artifacts:
+            files:
+              - '**/*'
       TimeoutInMinutes: 30
 
   Pipeline:
@@ -121,6 +122,8 @@ Resources:
                 ProjectName: !Ref 'S3UploadProject'
               InputArtifacts:
                 - Name: src
+              OutputArtifacts:
+                - Name: bld
               RunOrder: '1'
         - Name: QA
           Actions:
@@ -131,14 +134,13 @@ Resources:
                 Provider: CloudFormation
                 Version: '1'
               InputArtifacts:
-                - Name: src
+                - Name: bld
               Configuration:
                 ActionMode: REPLACE_ON_FAILURE
                 RoleArn: !GetAtt [CFNRole, Arn]
                 StackName: !Sub qa-${AWS::StackName}-sagemaker-endpoint
-                TemplatePath: !Sub "src::CloudFormation/sagemaker.yaml"
-                TemplateConfiguration: "src::CloudFormation/configuration.json"
-                ParameterOverrides: !Sub '{ "Parameters" : { "BucketName" : ${DataBucket}}}'
+                TemplatePath: !Sub "bld::CloudFormation/sagemaker.yaml"
+                TemplateConfiguration: "bld::CloudFormation/configuration.json"
               RunOrder: '1'
         - Name: Production
           Actions:
@@ -159,14 +161,13 @@ Resources:
                 Provider: CloudFormation
                 Version: '1'
               InputArtifacts:
-                - Name: src
+                - Name: bld
               Configuration:
                 ActionMode: REPLACE_ON_FAILURE
                 RoleArn: !GetAtt [CFNRole, Arn]
                 StackName: !Sub prod-${AWS::StackName}-sagemaker-endpoint
-                TemplatePath: !Sub "src::CloudFormation/sagemaker.yaml"
-                TemplateConfiguration: "src::CloudFormation/configuration.json"
-                ParameterOverrides: !Sub '{ "Parameters" : { "BucketName" : ${DataBucket}}}'
+                TemplatePath: !Sub "bld::CloudFormation/sagemaker.yaml"
+                TemplateConfiguration: "bld::CloudFormation/configuration.json"
               RunOrder: '2'
 
   CFNRole:
@@ -189,9 +190,36 @@ Resources:
               - Action:
                   - sagemaker:*
                   - iam:PassRole
+                  - s3:*
                 Effect: Allow
                 Resource: '*'
-              
+
+  CodeBuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${AWS::StackName}-pipeline-codebuild-role
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: ['sts:AssumeRole']
+          Effect: Allow
+          Principal:
+            Service: [codebuild.amazonaws.com]
+        Version: '2012-10-17'
+      Path: /
+      Policies:
+        - PolicyName: UploadAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                - codepipeline:*
+                - s3:*
+                - logs:CreateLogGroup
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+                Effect: Allow
+                Resource: '*'
+             
   PipelineRole:
     Type: AWS::IAM::Role
     Properties:
@@ -225,28 +253,30 @@ Resources:
                 - sns:Publish
                 Effect: Allow
                 Resource: '*'
-  CodeBuildRole:
+
+  SagemakerRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ${AWS::StackName}-pipeline-codebuild-role
+      RoleName: !Sub ${AWS::StackName}-pipeline-sagemaker-role
       AssumeRolePolicyDocument:
         Statement:
         - Action: ['sts:AssumeRole']
           Effect: Allow
           Principal:
-            Service: [codebuild.amazonaws.com]
+            Service: [codepipeline.amazonaws.com]
         Version: '2012-10-17'
       Path: /
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/AmazonSageMakerFullAccess 
       Policies:
-        - PolicyName: UploadAccess
+        - PolicyName: S3Access
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
               - Action:
-                - codepipeline:*
-                - s3:*
-                - logs:CreateLogGroup
-                - logs:CreateLogStream
-                - logs:PutLogEvents
+                - s3:GetObject
+                - s3:PutObject
+                - s3:DeleteObject
+                - s3:ListBucket
                 Effect: Allow
-                Resource: '*'
+                Resource: arn:aws:s3:::*

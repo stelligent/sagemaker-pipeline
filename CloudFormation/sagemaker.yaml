@@ -6,11 +6,16 @@ Parameters:
     MaxLength: '64'
     MinLength: '1'
     Type: String
+  SageMakerRole:
+    Description: Name of SageMaker role
+    MaxLength: '64'
+    MinLength: '1'
+    Type: String
 Resources:
   Model:
     Type: "AWS::SageMaker::Model"
     Properties:
-      ExecutionRoleArn: arn:aws:iam::324320755747:role/service-role/AmazonSageMaker-ExecutionRole-20180619T164672
+      ExecutionRoleArn: !Sub ${SageMakerRole}
       PrimaryContainer:
         ModelDataUrl: !Sub s3://${BucketName}/model.tar.gz
         Image: 520713654638.dkr.ecr.us-east-1.amazonaws.com/sagemaker-tensorflow:1.6-cpu-py2
