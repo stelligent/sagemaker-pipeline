@@ -73,14 +73,12 @@ Resources:
         BuildSpec: !Sub |
           version: 0.2
           phases:
+            install:
+              commands:
+                - gem install cfn-nag
             build:
-              install:
-                commands:
-                  - set -x
-                  - gem install cfn-nag
-              build:
-                commands:
-                  - cfn_nag_scan -p .cfn_nag -i CloudFormation/*.yaml
+              commands:
+                - cfn_nag_scan --input-path CloudFormation/*.yaml
       TimeoutInMinutes: 30
 
   S3UploadProject:
@@ -137,7 +135,7 @@ Resources:
               OutputArtifacts:
                 - Name: src
               RunOrder: '1'
-        - Name: Build&Train
+        - Name: Build_and_Train
           Actions:
             - Name: cfn-nag
               ActionTypeId:
