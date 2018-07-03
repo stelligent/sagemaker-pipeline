@@ -15,7 +15,7 @@ Resources:
   Model:
     Type: "AWS::SageMaker::Model"
     Properties:
-      ExecutionRoleArn: !Sub ${SageMakerRole}
+      ExecutionRoleArn: !Sub arn:aws:iam::${AWS::AccountId}:role/${SageMakerRole}
       PrimaryContainer:
         ModelDataUrl: !Sub s3://${BucketName}/model.tar.gz
         Image: 520713654638.dkr.ecr.us-east-1.amazonaws.com/sagemaker-tensorflow:1.6-cpu-py2

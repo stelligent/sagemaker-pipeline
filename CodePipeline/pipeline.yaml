@@ -110,7 +110,7 @@ Resources:
               OutputArtifacts:
                 - Name: src
               RunOrder: '1'
-        - Name: UploadArtifacts
+        - Name: UploadModel
           Actions:
             - Name: UploadtoS3
               ActionTypeId:
