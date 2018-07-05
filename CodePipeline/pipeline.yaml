@@ -109,6 +109,29 @@ Resources:
               - '**/*'
       TimeoutInMinutes: 30
 
+  TestEndpointProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Sub ${AWS::StackName}-pipeline-testendpoint
+      Description: Checks if endpoint is working
+      ServiceRole: !GetAtt CodeBuildRole.Arn
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/eb-python-2.7-amazonlinux-64:2.1.6
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: !Sub |
+          version: 0.2
+          phases:
+            install:
+              commands:
+            build:
+              commands:
+      TimeoutInMinutes: 30
+
   Pipeline:
     Type: AWS::CodePipeline::Pipeline
     Properties:
@@ -178,6 +201,17 @@ Resources:
                 TemplatePath: !Sub "bld::CloudFormation/sagemaker.yaml"
                 TemplateConfiguration: "bld::CloudFormation/configuration.json"
               RunOrder: '1'
+            - Name: TestEndpoint
+              ActionTypeId:
+                Category: Test
+                Owner: AWS
+                Provider: CodeBuild
+                Version: '1'
+              Configuration:
+                ProjectName: !Ref 'TestEndpointProject'
+              InputArtifacts:
+                - Name: bld
+              RunOrder: '2'
         - Name: Production
           Actions:
             - Name: ApprovalGate
@@ -205,6 +239,17 @@ Resources:
                 TemplatePath: !Sub "bld::CloudFormation/sagemaker.yaml"
                 TemplateConfiguration: "bld::CloudFormation/configuration.json"
               RunOrder: '2'
+            - Name: TestEndpoint
+              ActionTypeId:
+                Category: Test
+                Owner: AWS
+                Provider: CodeBuild
+                Version: '1'
+              Configuration:
+                ProjectName: !Ref 'TestEndpointProject'
+              InputArtifacts:
+                - Name: bld
+              RunOrder: '3'
 
   CFNRole:
     Type: AWS::IAM::Role
