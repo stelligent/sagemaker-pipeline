@@ -106,7 +106,8 @@ Resources:
             build:
               commands:
                 - echo "Running training.py"
-                - python3 ./Source/training.py
+                - ls
+                - python3 Source/training.py
             post_build:
               commands:
                 - rm caltech*
