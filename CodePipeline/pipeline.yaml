@@ -81,6 +81,40 @@ Resources:
                 - cfn_nag_scan --input-path CloudFormation/*.yaml
       TimeoutInMinutes: 30
 
+  ModelTrainingProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Sub ${AWS::StackName}-pipeline-modeltraining
+      Description: Trains machine learning model using SageMaker
+      ServiceRole: !GetAtt CodeBuildRole.Arn
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/eb-python-3.4-amazonlinux-64:2.1.6
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: !Sub |
+          version: 0.2
+          phases:
+            install:
+              commands:
+                - echo "Installing wget and boto3"
+                - pip3 install wget
+                - pip3 install boto3
+            build:
+              commands:
+                - echo "Running training.py"
+                - python3 training.py
+            post_build:
+              commands:
+                - rm caltech*
+          artifacts:
+            files:
+              - '**/*'
+      TimeoutInMinutes: 30
+
   S3UploadProject:
     Type: AWS::CodeBuild::Project
     DependsOn: DataBucket
@@ -102,7 +136,6 @@ Resources:
             build:
               commands:
                 - echo '{ "Parameters":{"BucketName":"${DataBucket}","SageMakerRole":"${SagemakerRole}"}}' > ./CloudFormation/configuration.json
-                - aws s3 cp ./Source/model.tar.gz s3://${AWS::StackName}-pipeline-data/model.tar.gz
                 - aws s3 cp ./Source/sourcedir.tar.gz s3://${AWS::StackName}-pipeline-data/sourcedir.tar.gz
           artifacts:
             files:
@@ -171,6 +204,19 @@ Resources:
               InputArtifacts:
                 - Name: src
               RunOrder: '1'
+            - Name: ModelTraining
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: '1'
+              Configuration:
+                ProjectName: !Ref 'ModelTrainingProject'
+              InputArtifacts:
+                - Name: src
+              OutputArtifacts:
+                - Name: model
+              RunOrder: '2'
             - Name: UploadtoS3
               ActionTypeId:
                 Category: Build
@@ -180,10 +226,10 @@ Resources:
               Configuration:
                 ProjectName: !Ref 'S3UploadProject'
               InputArtifacts:
-                - Name: src
+                - Name: model
               OutputArtifacts:
                 - Name: bld
-              RunOrder: '2'
+              RunOrder: '3'
         - Name: QA
           Actions:
             - Name: LaunchEndpoint
