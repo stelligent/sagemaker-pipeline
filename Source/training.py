@@ -10,7 +10,7 @@ start = time.time()
 
 role = sys.argv[1]
 bucket = sys.argv[2]
-
+commitID = sys.argv[2]
 #role = "arn:aws:iam::324320755747:role/harlen-sagemaker-pipeline1-pipeline-sagemaker-role"
 #bucket='harlen-test' # customize to your bucket
 
@@ -57,9 +57,8 @@ learning_rate = "0.01"
 
 s3 = boto3.client('s3')
 # create unique job name 
-job_name_prefix = 'DEMO-imageclassification'
-timestamp = time.strftime('-%Y-%m-%d-%H-%M-%S', time.gmtime())
-job_name = job_name_prefix + timestamp
+job_name_prefix = 'sagemaker-image-classification-model'
+job_name = job_name_prefix + commitID
 training_params = \
 {
     # specify the training docker image
