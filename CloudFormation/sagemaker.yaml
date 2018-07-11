@@ -6,6 +6,11 @@ Parameters:
     MaxLength: '64'
     MinLength: '1'
     Type: String
+  CommitID:
+    Description: ID of the current commit
+    MaxLength: '64'
+    MinLength: '1'
+    Type: String
   SageMakerRole:
     Description: Name of SageMaker role
     MaxLength: '64'
@@ -15,26 +20,22 @@ Resources:
   Model:
     Type: "AWS::SageMaker::Model"
     Properties:
+      ModelName: !Sub model-${CommitID}
       ExecutionRoleArn: !Sub arn:aws:iam::${AWS::AccountId}:role/${SageMakerRole}
       PrimaryContainer:
-        ModelDataUrl: !Sub s3://${BucketName}/model.tar.gz
-        Image: 520713654638.dkr.ecr.us-east-1.amazonaws.com/sagemaker-tensorflow:1.6-cpu-py2
-        Environment:
-          SAGEMAKER_CONTAINER_LOG_LEVEL: 20
-          SAGEMAKER_ENABLE_CLOUDWATCH_METRICS: false
-          SAGEMAKER_PROGRAM: abalone.py
-          SAGEMAKER_REGION: us-east-1
-          SAGEMAKER_SUBMIT_DIRECTORY: !Sub s3://${BucketName}/sourcedir.tar.gz
+        ModelDataUrl: !Sub s3://${BucketName}/model-${CommitID}/output/model.tar.gz
+        Image: 811284229777.dkr.ecr.us-east-1.amazonaws.com/image-classification:latest
   Endpoint:
     Type: "AWS::SageMaker::Endpoint"
     DependsOn: EndpointConfig
     Properties:
-      EndpointName: !Sub ${AWS::StackName}-Endpoint
+      EndpointName: !Sub model-${CommitID}
       EndpointConfigName: !GetAtt EndpointConfig.EndpointConfigName
   EndpointConfig:
     Type: "AWS::SageMaker::EndpointConfig"
     DependsOn: Model
     Properties:
+        EndpointConfigName: !Sub model-${CommitID}
         ProductionVariants:  
         - ModelName: !GetAtt Model.ModelName
           VariantName: AllTraffic
