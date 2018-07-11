@@ -21,7 +21,7 @@ Resources:
     Type: "AWS::SageMaker::Model"
     Properties:
       ModelName: !Sub model-${CommitID}
-      ExecutionRoleArn: !Sub arn:aws:iam::${AWS::AccountId}:role/${SageMakerRole}
+      ExecutionRoleArn: !Sub ${SageMakerRole}
       PrimaryContainer:
         ModelDataUrl: !Sub s3://${BucketName}/model-4ee5869/output/model.tar.gz
         Image: 811284229777.dkr.ecr.us-east-1.amazonaws.com/image-classification:latest

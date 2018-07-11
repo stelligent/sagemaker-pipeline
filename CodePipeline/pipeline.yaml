@@ -277,7 +277,7 @@ Resources:
   CFNRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ${AWS::StackName}-pipeline-cfn-role
+      RoleName: !Sub ${AWS::StackName}-cfn-role
       AssumeRolePolicyDocument:
         Statement:
         - Action: ['sts:AssumeRole']
@@ -301,7 +301,7 @@ Resources:
   CodeBuildRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ${AWS::StackName}-pipeline-codebuild-role
+      RoleName: !Sub ${AWS::StackName}-codebuild-role
       AssumeRolePolicyDocument:
         Statement:
         - Action: ['sts:AssumeRole']
@@ -327,7 +327,7 @@ Resources:
   PipelineRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ${AWS::StackName}-pipeline-pipeline-role
+      RoleName: !Sub ${AWS::StackName}-pipeline-role
       AssumeRolePolicyDocument:
         Statement:
         - Action: ['sts:AssumeRole']
@@ -361,7 +361,7 @@ Resources:
   SagemakerRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ${AWS::StackName}-pipeline-sagemaker-role
+      RoleName: !Sub ${AWS::StackName}-sagemaker-role
       AssumeRolePolicyDocument:
         Statement:
         - Action: ['sts:AssumeRole']
