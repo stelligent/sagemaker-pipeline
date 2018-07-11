@@ -23,7 +23,7 @@ Resources:
       ModelName: !Sub model-${CommitID}
       ExecutionRoleArn: !Sub ${SageMakerRole}
       PrimaryContainer:
-        ModelDataUrl: !Sub s3://harlen-sagemaker-pipeline1/model-4ee5869/output/model.tar.gz
+        ModelDataUrl: !Sub s3://harlen-sagemaker-pipeline1-pipeline-data/model-4ee5869/output/model.tar.gz
         Image: 811284229777.dkr.ecr.us-east-1.amazonaws.com/image-classification:latest
   Endpoint:
     Type: "AWS::SageMaker::Endpoint"
