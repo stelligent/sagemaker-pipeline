@@ -69,7 +69,7 @@ training_params = \
     },
     "RoleArn": role,
     "OutputDataConfig": {
-        "S3OutputPath": 's3://harlen-sagemaker-pipeline1-pipeline-data/'
+        "S3OutputPath": 's3://{}/'.format(bucket)
     },
     "ResourceConfig": {
         "InstanceCount": 1,

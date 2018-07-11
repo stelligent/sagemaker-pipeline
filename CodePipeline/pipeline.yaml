@@ -196,17 +196,6 @@ Resources:
               RunOrder: '1'
         - Name: Build_and_Train
           Actions:
-            - Name: cfn-nag
-              ActionTypeId:
-                Category: Test
-                Owner: AWS
-                Provider: CodeBuild
-                Version: '1'
-              Configuration:
-                ProjectName: !Ref 'CFNNagProject'
-              InputArtifacts:
-                - Name: src
-              RunOrder: '1'
             - Name: ModelTraining
               ActionTypeId:
                 Category: Build
