@@ -107,10 +107,12 @@ Resources:
               commands:
                 - echo "Running training.py"
                 - ls
-                - python3 Source/training.py
+                - python3 Source/training.py "${SagemakerRole.Arn}" "${DataBucket}"
+                - ls
             post_build:
               commands:
                 - rm caltech*
+                - ls
           artifacts:
             files:
               - '**/*'

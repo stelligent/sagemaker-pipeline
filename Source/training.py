@@ -4,11 +4,15 @@ import os
 import wget
 import time
 from time import gmtime, strftime
+import sys
 
 start = time.time()
 
-role = "arn:aws:iam::324320755747:role/harlen-sagemaker-pipeline1-pipeline-sagemaker-role"
-bucket='harlen-test' # customize to your bucket
+role = sys.argv[1]
+bucket = sys.argv[2]
+
+#role = "arn:aws:iam::324320755747:role/harlen-sagemaker-pipeline1-pipeline-sagemaker-role"
+#bucket='harlen-test' # customize to your bucket
 
 def download(url):
     filename = url.split("/")[-1]
