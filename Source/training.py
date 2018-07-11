@@ -141,5 +141,22 @@ except:
     message = sagemaker.describe_training_job(TrainingJobName=job_name)['FailureReason']
     print('Training failed with the following error: {}'.format(message))
 
+# creating configuration file so we can pass parameters to our sagemaker endpoint cloudformation
+
+config_data = {
+  "Parameters":
+    {
+      "BucketName": bucket,
+      "CommitID": commitID,
+      "SageMakerRole": role
+    }
+}
+
+json_config_data = json.dumps(config_data)
+
+f = open( './CloudFormation/configuration.json', 'w' )
+f.write(json_config_data)
+f.close()
+
 end = time.time()
 print(end - start)

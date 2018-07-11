@@ -106,14 +106,11 @@ Resources:
             build:
               commands:
                 - echo "Running training.py"
-                - ls
-                - echo $CODEBUILD_RESOLVED_SOURCE_VERSION
                 - python3 Source/training.py "${SagemakerRole.Arn}" "${DataBucket}" $CODEBUILD_RESOLVED_SOURCE_VERSION
-                - ls
             post_build:
               commands:
+                - echo "Cleaning"
                 - rm caltech*
-                - ls
           artifacts:
             files:
               - '**/*'
@@ -208,21 +205,8 @@ Resources:
               InputArtifacts:
                 - Name: src
               OutputArtifacts:
-                - Name: model
-              RunOrder: '2'
-            - Name: UploadtoS3
-              ActionTypeId:
-                Category: Build
-                Owner: AWS
-                Provider: CodeBuild
-                Version: '1'
-              Configuration:
-                ProjectName: !Ref 'S3UploadProject'
-              InputArtifacts:
-                - Name: model
-              OutputArtifacts:
                 - Name: bld
-              RunOrder: '3'
+              RunOrder: '2'
         - Name: QA
           Actions:
             - Name: LaunchEndpoint
