@@ -384,3 +384,13 @@ Resources:
                 - s3:ListBucket
                 Effect: Allow
                 Resource: arn:aws:s3:::*
+  Outputs:
+    PipelineUrl:
+      Value:
+        Fn::Join:
+        - ''
+        - - https://console.aws.amazon.com/codepipeline/home?region=
+          - Ref: AWS::Region
+          - "#/view/"
+          - Ref: Pipeline
+      Description: Pipeline URL
