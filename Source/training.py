@@ -10,7 +10,7 @@ start = time.time()
 
 role = sys.argv[1]
 bucket = sys.argv[2]
-commitID = sys.argv[2]
+commitID = sys.argv[3]
 #role = "arn:aws:iam::324320755747:role/harlen-sagemaker-pipeline1-pipeline-sagemaker-role"
 #bucket='harlen-test' # customize to your bucket
 
