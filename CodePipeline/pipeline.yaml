@@ -107,6 +107,7 @@ Resources:
               commands:
                 - echo "Running training.py"
                 - ls
+                - echo $CODEBUILD_RESOLVED_SOURCE_VERSION
                 - python3 Source/training.py "${SagemakerRole.Arn}" "${DataBucket}" $CODEBUILD_RESOLVED_SOURCE_VERSION
                 - ls
             post_build:

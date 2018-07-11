@@ -57,7 +57,7 @@ learning_rate = "0.01"
 
 s3 = boto3.client('s3')
 # create unique job name 
-job_name_prefix = 'sagemaker-image-classification-model'
+job_name_prefix = 'model-'
 job_name = job_name_prefix + commitID
 training_params = \
 {
