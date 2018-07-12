@@ -15,26 +15,26 @@ This is a sample solution using a SageMaker pipeline.  This implementation could
   (TO BE CREATED)
 
 
-###  Components details
-  - **AWS CloudFormation** – This solution uses the CloudFormation Template language, in either YAML or JSON, to create each resource.
-  - **AWS CodeBuild** – This solution uses CodeBuild to build the source code from GitHub
-  - **AWS CodePipeline** – CodePipeline has various stages defined in CloudFormation which step through which actions must be taken in which order to go from source code to creation of the production endpoint.
-  - **AWS EC2** – EC2 Instances are created in order to train the model as well as host the model to be accessed via and endpoint.  
-  - **AWS SageMaker** – This solution uses SageMaker to train the model to be used and host the model at an endpoint, where it can be accessed via HTTP/HTTPS requests
-  - **AWS IAM** – Separate Identity and Access Management (IAM) Roles are created for the pipeline, CodeBuild, and CloudFormation.
-  - **AWS SNS** – This solution uses a Simple Notification Service (SNS) Topic in order to approve movement into production after testing.
-  - **AWS S3** – Artifacts created throughout the pipeline as well as the data for the model is stored in an Simple Storage Service (S3) Bucket.
+###  Components Details
+  - [**AWS CloudFormation**](https://aws.amazon.com/cloudformation/) – This solution uses the CloudFormation Template language, in either YAML or JSON, to create each resource.
+  - [**AWS CodeBuild**](https://aws.amazon.com/codebuild/) – This solution uses CodeBuild to build the source code from GitHub
+  - [**AWS CodePipeline**](https://aws.amazon.com/codepipeline/) – CodePipeline has various stages defined in CloudFormation which step through which actions must be taken in which order to go from source code to creation of the production endpoint.
+  - [**AWS EC2**](https://aws.amazon.com/ec2/) – EC2 Instances are created in order to train the model as well as host the model to be accessed via and endpoint.  
+  - [**AWS SageMaker**](https://aws.amazon.com/sagemaker/) – This solution uses SageMaker to train the model to be used and host the model at an endpoint, where it can be accessed via HTTP/HTTPS requests
+  - [**AWS IAM**](https://aws.amazon.com/iam/) – Separate Identity and Access Management (IAM) Roles are created for the pipeline, CodeBuild, and CloudFormation.
+  - [**AWS SNS**](https://aws.amazon.com/sns/) – This solution uses a Simple Notification Service (SNS) Topic in order to approve movement into production after testing.
+  - [**AWS S3**](https://aws.amazon.com/s3/) – Artifacts created throughout the pipeline as well as the data for the model is stored in an Simple Storage Service (S3) Bucket.
 
 
 ## CloudFormation Templates resources
   - **AWS CloudFormation** – `AWS::CloudFormation::Interface` sets parameter group metadata.
   - **AWS CodeBuild** – `AWS::CodeBuild::Project` uploads the project source code stored in GitHub to an S3 bucket.
   - **AWS CodePipeline** – `AWS::CodePipeline::Pipeline` – Easiest to create the Pipeline in the AWS Console, then use the get-pipeline CLI command to get the configuration in JSON to be placed into the CloudFormation Template.
-  - **AWS EC2** – (instance type specified in `AWS::SageMaker::EndpointConfig`)
+  - **AWS EC2** – Instance type specified in `AWS::SageMaker::EndpointConfig`
   - **AWS SageMaker** – `AWS::SageMaker::Model` – here the algorithm to be used by SageMaker is specified, as well as the source code to be submitted to once the model has been created;
-    
+
     `AWS::SageMaker::Endpoint` – this is the endpoint from which you can make requests;
-    
+
     `AWS::SageMaker::EndpointConfig` – here we specify key configurations for the endpoint, including the type of EC2 instance used, and can specify if we would like multiple endpoint models, e.g. for A-B testing, and similarly how much/what traffic we will direct to this endpoint.
   - **AWS IAM** – `AWS::IAM::Role` – Make sure to specify only the necessary permissions for each role.
   - **AWS SNS** – `AWS::SNS::Topic` – sends a confirmation to the email specified as a parameter.
@@ -53,24 +53,56 @@ This is a sample solution using a SageMaker pipeline.  This implementation could
 
 
 ## Parameters
-- **BucketName** – The name of the S3 data bucket to be created/used
-- **SageMakerRole** – The name of the SageMaker role
-- **Email** – The email where CodePipeline will send SNS notifications
-- **GitHubToken** – A Secret OAuthToken with access to the GitHub repo
-- **GitHubUser** – GitHub Username
-- **Repo** – The name (not URL) of the GitHub repository to pull from
-- **Branch** – The name (not URL) of the GitHub repository’s branch to use
+### sagemaker.yaml
+Parameters | Description
+---------- | -----------
+BucketName | The name of the S3 data bucket to be created/used.
+CommitID | The ID of the current commit.
+Environment | Current environment we are working in.
+ParentStackName | The name of the pipeline stack.
+SageMakerRole | The name of the SageMaker role.
+Timestamp | Resource timestamp to prevent naming conflicts.
+
+### pipeline.yaml
+Parameters | Description
+---------- | -----------
+Email | The email where CodePipeline will send SNS notifications.
+GitHubToken | A Secret OAuthToken with access to the GitHub repo.
+GitHubUser | GitHub Username.
+Repo | The name (not URL) of the GitHub repository to pull from.
+Branch | The name (not URL) of the GitHub repository’s branch to use.
 
 
 ## Deployment Steps
 ####  Step 1. Prepare an AWS Account
+1. Create your AWS account at http://aws.amazon.com by following the instructions on the site.
+2. Ensure you are in the Northern Virginia Region (us-east-1) by selecting through the navigation bar.
+3. Create a key pair that you will use for your EC2 instances. Do this quickly by navigating to EC2 under services, choose **Key Pairs**, click **Create a Key Pair**, *type a name*, and choose **Create**.
+
 ####  Step 2. Launch the Stack
+Click on the **Launch Stack** button below to launch the CloudFormation Stack to set up the SageMaker Pipeline. Before Launching, ensure all architecture, configuration, etc. is set as desired.
+
+**Stack Assumptions:** The pipeline stack assumes the following conditions, and may not function properly if they are not met:
+1. The pipeline stack name is less than 20 characters long
+2. The stack is launched in the US East (N. Virginia) Region, us-east-1.
+
+[![Launch CFN stack](https://s3.amazonaws.com/stelligent-training-public/public/cloudformation-launch-stack.png)]()
+
+<!-- [![Launch CFN stack](https://s3.amazonaws.com/stelligent-training-public/public/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#cstack=sn~DromedaryStack|turl~https://s3.amazonaws.com/stelligent-training-public/master/dromedary-master.json) -->
+
+<!-- TODO: Change above to correct URL!!! -->
+
 ####  Step 3. Test and Approve the Deployment
+Once the deployment has passed automated QA testing, before proceeding with the production stage it send an SNS request for manual approval. At this time, you may run any additional tests on the endpoint before approving it to be deployed into production.
+
+####  Approximate Times:
+**Model Training:** __ Minutes
+
+**Launch Endpoint:** __ Minutes
 
 
 ## Summary
-------------
+After following the deployment steps, your pipeline should be up and running with a production SageMaker Endpoint that you can query to make inferences with your newly trained model!
 
-
-## Additional Resources
-------------
+<!-- ## Additional Resources
+------------ -->
