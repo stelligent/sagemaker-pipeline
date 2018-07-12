@@ -142,7 +142,7 @@ Resources:
             build:
               commands:
               - echo "Running test.py"
-              - python3 Source/test.py "test.jpg" "qa-${AWS::StackName}" $CODEBUILD_RESOLVED_SOURCE_VERSION
+              - python3 Source/test.py "qa-${AWS::StackName}" "CloudFormation/configuration_qa.json"
       TimeoutInMinutes: 30
 
   TestEndpointProjectProd:
@@ -171,7 +171,7 @@ Resources:
             build:
               commands:
               - echo "Running test.py"
-              - python3 Source/test.py "test.jpg" "prod-${AWS::StackName}" $CODEBUILD_RESOLVED_SOURCE_VERSION
+              - python3 Source/test.py "prod-${AWS::StackName}" "CloudFormation/configuration_prod.json"
       TimeoutInMinutes: 30
 
   Pipeline:
