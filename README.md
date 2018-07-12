@@ -84,7 +84,7 @@ Click on the **Launch Stack** button below to launch the CloudFormation Stack to
 
 **Stack Assumptions:** The pipeline stack assumes the following conditions, and may not function properly if they are not met:
 1. The pipeline stack name is less than 20 characters long
-2. The stack is launched in the US East (N. Virginia) Region, us-east-1.
+2. The stack is launched in the US East (N. Virginia) Region (us-east-1).
 
 [![Launch CFN stack](https://s3.amazonaws.com/stelligent-training-public/public/cloudformation-launch-stack.png)]()
 
