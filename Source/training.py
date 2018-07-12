@@ -59,8 +59,7 @@ learning_rate = "0.01"
 
 s3 = boto3.client('s3')
 # create unique job name 
-job_name_prefix = 'model-'
-job_name = job_name_prefix + commitID
+job_name = stack_name + "-" + commitID
 training_params = \
 {
     # specify the training docker image
