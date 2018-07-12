@@ -47,6 +47,15 @@ Resources:
       BucketName: !Sub ${AWS::StackName}-pipeline-data
       VersioningConfiguration:
         Status: Enabled
+        
+  SiteBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Delete
+    Properties:
+      AccessControl: PublicRead
+      BucketName: !Sub ${AWS::StackName}-src
+      WebsiteConfiguration:
+        IndexDocument: index.html
 
   CodePipelineSNSTopic:
     Type: AWS::SNS::Topic
@@ -55,6 +64,34 @@ Resources:
       Subscription:
         - Endpoint: !Ref Email
           Protocol: email
+          
+  CodeBuildDeploySite:
+    Type: AWS::CodeBuild::Project
+    DependsOn: CodeBuildRole
+    Properties:
+      Name: !Sub ${AWS::StackName}-DeploySite
+      Description: Deploy site to S3
+      ServiceRole: !GetAtt CodeBuildRole.Arn
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/eb-ruby-2.3-amazonlinux-64:2.1.6
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: !Sub |
+          version: 0.1
+          phases:
+            post_build:
+              commands:
+                - aws s3 cp --recursive --acl public-read ./ s3://${AWS::StackName}-src/ 
+          artifacts:
+            type: zip
+            files:
+              - '**/*'
+
+      TimeoutInMinutes: 10
   
   CFNNagProject:
     Type: AWS::CodeBuild::Project
@@ -202,6 +239,17 @@ Resources:
               RunOrder: '1'
         - Name: Build_and_Train
           Actions:
+            - Name: CopyToS3
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: '1'
+              Configuration:
+                ProjectName: !Ref CodeBuildDeploySite
+              InputArtifacts:
+                - Name: src
+              RunOrder: '1'
             - Name: cfn-nag
               ActionTypeId:
                 Category: Test
@@ -411,11 +459,11 @@ Resources:
 
 Outputs:      
   PipelineUrl:
-    Value:
-      Fn::Join:
-      - ''
-      - - https://console.aws.amazon.com/codepipeline/home?region=
-        - Ref: AWS::Region
-        - "#/view/"
-        - Ref: Pipeline
-    Description: Pipeline URL
+    Value: !Sub https://console.aws.amazon.com/codepipeline/home?region=${AWS::Region}#/view/${Pipeline}
+    Description: CodePipeline URL
+  LaunchStackUrl:
+    Value: !Sub https://console.aws.amazon.com/cloudformation/home?region=us-east-1#cstack=sn~sagemaker-stack|turl~https://s3.amazonaws.com/${AWS::StackName}-src/CodePipeline/pipeline.yaml
+    Description: Location of CloudFormation Template used by Launch Stack for us-east-1
+  LaunchStackMarkdownCode:
+    Value: !Sub (https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#cstack=sn~sagemaker-stack|turl~https://s3.amazonaws.com/${AWS::StackName}-src/CodePipeline/pipeline.yaml)
+    Description: Code snippet written in Markdown for launching a stack
