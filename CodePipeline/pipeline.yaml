@@ -465,5 +465,5 @@ Outputs:
     Value: !Sub https://console.aws.amazon.com/cloudformation/home?region=us-east-1#cstack=sn~sagemaker-stack|turl~https://s3.amazonaws.com/${AWS::StackName}-src/CodePipeline/pipeline.yaml
     Description: Location of CloudFormation Template used by Launch Stack for us-east-1
   LaunchStackMarkdownCode:
-    Value: !Sub [![Launch CFN stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#cstack=sn~sagemaker-stack|turl~https://s3.amazonaws.com/${AWS::StackName}-src/CodePipeline/pipeline.yaml)
+    Value: !Sub (https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#cstack=sn~sagemaker-stack|turl~https://s3.amazonaws.com/${AWS::StackName}-src/CodePipeline/pipeline.yaml)
     Description: Code snippet written in Markdown for launching a stack
