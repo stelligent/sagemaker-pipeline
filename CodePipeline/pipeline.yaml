@@ -142,7 +142,7 @@ Resources:
             build:
               commands:
               - echo "Running test.py"
-              - python3 test.py "test.jpg" "qa-${AWS::StackName}-endpoint" $CODEBUILD_RESOLVED_SOURCE_VERSION
+              - python3 Source/test.py "test.jpg" "qa-${AWS::StackName}" $CODEBUILD_RESOLVED_SOURCE_VERSION
       TimeoutInMinutes: 30
 
   TestEndpointProjectProd:
@@ -171,7 +171,7 @@ Resources:
             build:
               commands:
               - echo "Running test.py"
-              - python3 training.py test.jpg
+              - python3 Source/test.py "test.jpg" "prod-${AWS::StackName}" $CODEBUILD_RESOLVED_SOURCE_VERSION
       TimeoutInMinutes: 30
 
   Pipeline:
@@ -228,9 +228,9 @@ Resources:
               Configuration:
                 ActionMode: REPLACE_ON_FAILURE
                 RoleArn: !GetAtt [CFNRole, Arn]
-                StackName: !Sub qa-${AWS::StackName}-endpoint
+                StackName: !Sub qa-${AWS::StackName}
                 TemplatePath: !Sub "bld::CloudFormation/sagemaker.yaml"
-                TemplateConfiguration: "bld::CloudFormation/configuration.json"
+                TemplateConfiguration: "bld::CloudFormation/configuration_qa.json"
               RunOrder: '1'
             - Name: TestEndpoint
               ActionTypeId:
@@ -266,9 +266,9 @@ Resources:
               Configuration:
                 ActionMode: REPLACE_ON_FAILURE
                 RoleArn: !GetAtt [CFNRole, Arn]
-                StackName: !Sub prod-${AWS::StackName}-sagemaker-endpoint
+                StackName: !Sub prod-${AWS::StackName}
                 TemplatePath: !Sub "bld::CloudFormation/sagemaker.yaml"
-                TemplateConfiguration: "bld::CloudFormation/configuration.json"
+                TemplateConfiguration: "bld::CloudFormation/configuration_prod.json"
               RunOrder: '2'
             - Name: TestEndpoint
               ActionTypeId:

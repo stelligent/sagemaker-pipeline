@@ -12,8 +12,8 @@ start = time.time()
 role = sys.argv[1]
 bucket = sys.argv[2]
 stack_name = sys.argv[3]
-commitID = sys.argv[4]
-commitID = commitID[0:7]
+commit_id = sys.argv[4]
+commit_id = commit_id[0:7]
 
 training_image = '811284229777.dkr.ecr.us-east-1.amazonaws.com/image-classification:latest'
 
@@ -59,7 +59,7 @@ learning_rate = "0.01"
 
 s3 = boto3.client('s3')
 # create unique job name 
-job_name = stack_name + "-" + commitID
+job_name = stack_name + "-" + commit_id
 training_params = \
 {
     # specify the training docker image
@@ -142,22 +142,41 @@ except:
     message = sagemaker.describe_training_job(TrainingJobName=job_name)['FailureReason']
     print('Training failed with the following error: {}'.format(message))
 
-# creating configuration file so we can pass parameters to our sagemaker endpoint cloudformation
 
-config_data = {
+# creating configuration files so we can pass parameters to our sagemaker endpoint cloudformation
+
+config_data_qa = {
   "Parameters":
     {
-      "BucketName": bucket,
-      "CommitID": commitID,
-      "SageMakerRole": role, 
-      "StackName": stack_name
+        "BucketName": bucket,
+        "CommitID": commit_id,
+        "Environment": "qa",
+        "ParentStackName": stack_name,
+        "SageMakerRole": role
     }
 }
 
-json_config_data = json.dumps(config_data)
+config_data_prod = {
+  "Parameters":
+    {
+        "BucketName": bucket,
+        "CommitID": commit_id,
+        "Environment": "prod",
+        "ParentStackName": stack_name,
+        "SageMakerRole": role
+    }
+}
 
-f = open( './CloudFormation/configuration.json', 'w' )
-f.write(json_config_data)
+
+json_config_data = json.dumps(config_data_qa)
+json_config_data = json.dumps(config_data_prod)
+
+f = open( './CloudFormation/configuration_qa.json', 'w' )
+f.write(json_config_data_qa)
+f.close()
+
+f = open( './CloudFormation/configuration_prod.json', 'w' )
+f.write(json_config_data_prod)
 f.close()
 
 end = time.time()
