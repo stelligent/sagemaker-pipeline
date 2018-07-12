@@ -53,7 +53,7 @@ Resources:
     DeletionPolicy: Delete
     Properties:
       AccessControl: PublicRead
-      BucketName: !Sub ${AWS::StackName}-website
+      BucketName: !Sub ${AWS::StackName}-src
       WebsiteConfiguration:
         IndexDocument: index.html
 
@@ -462,5 +462,5 @@ Outputs:
     Value: !Sub https://console.aws.amazon.com/codepipeline/home?region=${AWS::Region}#/view/${Pipeline}
     Description: CodePipeline URL
   CFNTemplate:
-    Value: !Sub https://s3.amazonaws.com/${AWS::StackName}/CodePipeline/pipeline.yaml
+    Value: !Sub https://s3.amazonaws.com/${AWS::StackName}-src/CodePipeline/pipeline.yaml
     Description: Location of CloudFormation Template used by Launch Stack
