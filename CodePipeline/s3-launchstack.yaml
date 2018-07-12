@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: >
-  CloudFormation SageMaker pipeline.
+  Creates an S3 bucket that hosts GitHub from stelligent/sagemaker-pipeline to use for Launch Stack.
 Parameters:
   Email:
     Description: The email address where CodePipeline sends pipeline notifications
