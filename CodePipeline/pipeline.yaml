@@ -461,6 +461,6 @@ Outputs:
   PipelineUrl:
     Value: !Sub https://console.aws.amazon.com/codepipeline/home?region=${AWS::Region}#/view/${Pipeline}
     Description: CodePipeline URL
-  CFNTemplate:
-    Value: !Sub https://s3.amazonaws.com/${AWS::StackName}-src/CodePipeline/pipeline.yaml
-    Description: Location of CloudFormation Template used by Launch Stack
+  LaunchStackUrl:
+    Value: !Sub https://console.aws.amazon.com/cloudformation/home?region=us-east-1#cstack=sn~sagemaker-stack|turl~https://s3.amazonaws.com/${AWS::StackName}-src/CodePipeline/pipeline.yaml
+    Description: Location of CloudFormation Template used by Launch Stack for us-east-1
