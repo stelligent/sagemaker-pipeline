@@ -149,7 +149,8 @@ config_data = {
     {
       "BucketName": bucket,
       "CommitID": commitID,
-      "SageMakerRole": role
+      "SageMakerRole": role, 
+      "StackName": stack_name
     }
 }
 
