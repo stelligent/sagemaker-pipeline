@@ -16,6 +16,7 @@ commit_id = sys.argv[4]
 commit_id = commit_id[0:7]
 
 training_image = '811284229777.dkr.ecr.us-east-1.amazonaws.com/image-classification:latest'
+timestamp = time.strftime('-%Y-%m-%d-%H-%M-%S', time.gmtime())
 
 def download(url):
     filename = url.split("/")[-1]
@@ -59,7 +60,7 @@ learning_rate = "0.01"
 
 s3 = boto3.client('s3')
 # create unique job name 
-job_name = stack_name + "-" + commit_id
+job_name = stack_name + "-" + commit_id + "-" + timestamp
 training_params = \
 {
     # specify the training docker image
@@ -152,7 +153,8 @@ config_data_qa = {
         "CommitID": commit_id,
         "Environment": "qa",
         "ParentStackName": stack_name,
-        "SageMakerRole": role
+        "SageMakerRole": role,
+        "Timestamp": timestamp
     }
 }
 
@@ -163,7 +165,8 @@ config_data_prod = {
         "CommitID": commit_id,
         "Environment": "prod",
         "ParentStackName": stack_name,
-        "SageMakerRole": role
+        "SageMakerRole": role,
+        "Timestamp": timestamp
     }
 }
 

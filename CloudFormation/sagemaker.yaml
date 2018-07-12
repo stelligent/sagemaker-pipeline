@@ -26,11 +26,16 @@ Parameters:
     MaxLength: '64'
     MinLength: '1'
     Type: String
+  Timestamp:
+    Description: Resource timestamp to prevent naming conflicts
+    MaxLength: '64'
+    MinLength: '1'
+    Type: String
 Resources:
   Model:
     Type: "AWS::SageMaker::Model"
     Properties:
-      ModelName: !Sub ${Environment}-${ParentStackName}-${CommitID}
+      ModelName: !Sub ${Environment}-${ParentStackName}-${CommitID}-${Timestamp}
       ExecutionRoleArn: !Sub ${SageMakerRole}
       PrimaryContainer:
         ModelDataUrl: !Sub s3://${BucketName}/${ParentStackName}-${CommitID}/output/model.tar.gz
@@ -39,13 +44,13 @@ Resources:
     Type: "AWS::SageMaker::Endpoint"
     DependsOn: EndpointConfig
     Properties:
-      EndpointName: !Sub ${Environment}-${ParentStackName}-${CommitID}
+      EndpointName: !Sub ${Environment}-${ParentStackName}-${CommitID}-${Timestamp}
       EndpointConfigName: !GetAtt EndpointConfig.EndpointConfigName
   EndpointConfig:
     Type: "AWS::SageMaker::EndpointConfig"
     DependsOn: Model
     Properties:
-        EndpointConfigName: !Sub ${Environment}-${ParentStackName}-${CommitID}
+        EndpointConfigName: !Sub ${Environment}-${ParentStackName}-${CommitID}-${Timestamp}
         ProductionVariants:  
         - ModelName: !GetAtt Model.ModelName
           VariantName: AllTraffic
