@@ -168,8 +168,8 @@ config_data_prod = {
 }
 
 
-json_config_data = json.dumps(config_data_qa)
-json_config_data = json.dumps(config_data_prod)
+json_config_data_qa = json.dumps(config_data_qa)
+json_config_data_prod = json.dumps(config_data_prod)
 
 f = open( './CloudFormation/configuration_qa.json', 'w' )
 f.write(json_config_data_qa)
