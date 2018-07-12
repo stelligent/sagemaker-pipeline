@@ -116,37 +116,10 @@ Resources:
               - '**/*'
       TimeoutInMinutes: 30
 
-  S3UploadProject:
-    Type: AWS::CodeBuild::Project
-    DependsOn: DataBucket
-    Properties:
-      Name: !Sub ${AWS::StackName}-pipeline-s3-upload
-      Description: Uploads artifacts from GitHub to S3
-      ServiceRole: !GetAtt CodeBuildRole.Arn
-      Artifacts:
-        Type: CODEPIPELINE
-      Environment:
-        Type: LINUX_CONTAINER
-        ComputeType: BUILD_GENERAL1_SMALL
-        Image: aws/codebuild/ubuntu-base:14.04
-      Source:
-        Type: CODEPIPELINE
-        BuildSpec: !Sub |
-          version: 0.2
-          phases:
-            build:
-              commands:
-                - echo '{ "Parameters":{"BucketName":"${DataBucket}","SageMakerRole":"${SagemakerRole}"}}' > ./CloudFormation/configuration.json
-                - aws s3 cp ./Source/sourcedir.tar.gz s3://${AWS::StackName}-pipeline-data/sourcedir.tar.gz
-          artifacts:
-            files:
-              - '**/*'
-      TimeoutInMinutes: 30
-
-  TestEndpointProject:
+  TestEndpointProjectQA:
     Type: AWS::CodeBuild::Project
     Properties:
-      Name: !Sub ${AWS::StackName}-pipeline-testendpoint
+      Name: !Sub ${AWS::StackName}-pipeline-test-qa
       Description: Checks if endpoint is working
       ServiceRole: !GetAtt CodeBuildRole.Arn
       Artifacts:
@@ -154,7 +127,7 @@ Resources:
       Environment:
         Type: LINUX_CONTAINER
         ComputeType: BUILD_GENERAL1_SMALL
-        Image: aws/codebuild/eb-python-2.7-amazonlinux-64:2.1.6
+        Image: aws/codebuild/eb-python-3.4-amazonlinux-64:2.1.6
       Source:
         Type: CODEPIPELINE
         BuildSpec: !Sub |
@@ -162,8 +135,43 @@ Resources:
           phases:
             install:
               commands:
+                - echo "Installing wget and boto3"
+                - pip3 install wget
+                - pip3 install boto3
+                - pip3 install numpy
             build:
               commands:
+              - echo "Running test.py"
+              - python3 test.py "test.jpg" "qa-${AWS::StackName}-endpoint" $CODEBUILD_RESOLVED_SOURCE_VERSION
+      TimeoutInMinutes: 30
+
+  TestEndpointProjectProd:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Sub ${AWS::StackName}-pipeline-test-prod
+      Description: Checks if endpoint is working
+      ServiceRole: !GetAtt CodeBuildRole.Arn
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/eb-python-3.4-amazonlinux-64:2.1.6
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: !Sub |
+          version: 0.2
+          phases:
+            install:
+              commands:
+                - echo "Installing wget and boto3"
+                - pip3 install wget
+                - pip3 install boto3
+                - pip3 install numpy
+            build:
+              commands:
+              - echo "Running test.py"
+              - python3 training.py test.jpg
       TimeoutInMinutes: 30
 
   Pipeline:
@@ -220,7 +228,7 @@ Resources:
               Configuration:
                 ActionMode: REPLACE_ON_FAILURE
                 RoleArn: !GetAtt [CFNRole, Arn]
-                StackName: !Sub qa-${AWS::StackName}-sagemaker-endpoint
+                StackName: !Sub qa-${AWS::StackName}-endpoint
                 TemplatePath: !Sub "bld::CloudFormation/sagemaker.yaml"
                 TemplateConfiguration: "bld::CloudFormation/configuration.json"
               RunOrder: '1'
@@ -231,7 +239,7 @@ Resources:
                 Provider: CodeBuild
                 Version: '1'
               Configuration:
-                ProjectName: !Ref 'TestEndpointProject'
+                ProjectName: !Ref 'TestEndpointProjectQA'
               InputArtifacts:
                 - Name: bld
               RunOrder: '2'
@@ -269,7 +277,7 @@ Resources:
                 Provider: CodeBuild
                 Version: '1'
               Configuration:
-                ProjectName: !Ref 'TestEndpointProject'
+                ProjectName: !Ref 'TestEndpointProjectProd'
               InputArtifacts:
                 - Name: bld
               RunOrder: '3'

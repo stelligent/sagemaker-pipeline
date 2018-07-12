@@ -20,7 +20,7 @@ Resources:
   Model:
     Type: "AWS::SageMaker::Model"
     Properties:
-      ModelName: !Sub model-${CommitID}
+      ModelName: !Sub ${AWS::StackName}-${CommitID}
       ExecutionRoleArn: !Sub ${SageMakerRole}
       PrimaryContainer:
         ModelDataUrl: !Sub s3://harlen-sagemaker-pipeline1-pipeline-data/model-4ee5869/output/model.tar.gz
@@ -29,13 +29,13 @@ Resources:
     Type: "AWS::SageMaker::Endpoint"
     DependsOn: EndpointConfig
     Properties:
-      EndpointName: !Sub model-${CommitID}
+      EndpointName: !Sub ${AWS::StackName}-${CommitID}
       EndpointConfigName: !GetAtt EndpointConfig.EndpointConfigName
   EndpointConfig:
     Type: "AWS::SageMaker::EndpointConfig"
     DependsOn: Model
     Properties:
-        EndpointConfigName: !Sub model-${CommitID}
+        EndpointConfigName: !Sub ${AWS::StackName}-${CommitID}
         ProductionVariants:  
         - ModelName: !GetAtt Model.ModelName
           VariantName: AllTraffic
