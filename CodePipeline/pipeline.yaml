@@ -106,7 +106,7 @@ Resources:
             build:
               commands:
                 - echo "Running training.py"
-                - python3 Source/training.py "${SagemakerRole.Arn}" "${DataBucket}" $CODEBUILD_RESOLVED_SOURCE_VERSION
+                - python3 Source/training.py "${SagemakerRole.Arn}" "${DataBucket}" "${AWS::StackName}" $CODEBUILD_RESOLVED_SOURCE_VERSION
             post_build:
               commands:
                 - echo "Cleaning"
@@ -325,12 +325,17 @@ Resources:
             Statement:
               - Action:
                 - codepipeline:*
+                - sagemaker:*
                 - s3:*
                 - logs:CreateLogGroup
                 - logs:CreateLogStream
                 - logs:PutLogEvents
                 Effect: Allow
                 Resource: '*'
+              - Action:
+                - iam:PassRole
+                Effect: Allow
+                Resource: !Sub arn:aws:iam::${AWS::AccountId}:role/${AWS::StackName}-sagemaker-role
              
   PipelineRole:
     Type: AWS::IAM::Role
@@ -392,7 +397,8 @@ Resources:
                 - s3:ListBucket
                 Effect: Allow
                 Resource: arn:aws:s3:::*
-Outputs:
+
+Outputs:      
   PipelineUrl:
     Value:
       Fn::Join:

@@ -11,7 +11,8 @@ start = time.time()
 
 role = sys.argv[1]
 bucket = sys.argv[2]
-commitID = sys.argv[3]
+stack_name = sys.argv[3]
+commitID = sys.argv[4]
 commitID = commitID[0:7]
 
 training_image = '811284229777.dkr.ecr.us-east-1.amazonaws.com/image-classification:latest'
