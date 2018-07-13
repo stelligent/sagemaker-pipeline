@@ -55,7 +55,10 @@ This is a sample solution using a SageMaker pipeline.  This implementation could
 ####  Step 1. Prepare an AWS Account
 Create your AWS account at http://aws.amazon.com by following the instructions on the site.
 
-####  Step 2. Launch the Stack
+####  Step 2. Create a GitHub OAuth Token
+Create your token at [GitHub's Token Settings](https://github.com/settings/tokens), making sure to select scopes of **repo** and **admin:repo_hook**.  After clicking **Generate Token**, make sure to save your OAuth Token in a secure location. The token will not be shown again.
+
+####  Step 3. Launch the Stack
 Click on the **Launch Stack** button below to launch the CloudFormation Stack to set up the SageMaker Pipeline. Before Launching, ensure all architecture, configuration, etc. is set as desired.
 
 **Stack Assumptions:** The pipeline stack assumes the following conditions, and may not function properly if they are not met:
@@ -68,7 +71,7 @@ Click on the **Launch Stack** button below to launch the CloudFormation Stack to
 
 <!-- TODO: Change above to correct URL!!! -->
 
-####  Step 3. Test and Approve the Deployment
+####  Step 4. Test and Approve the Deployment
 Once the deployment has passed automated QA testing, before proceeding with the production stage it send an SNS request for manual approval. At this time, you may run any additional tests on the endpoint before approving it to be deployed into production.
 
 ####  Approximate Times:
