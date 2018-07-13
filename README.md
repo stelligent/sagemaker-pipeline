@@ -6,7 +6,6 @@ This is a sample solution using a SageMaker pipeline.  This implementation could
 
 ## Prerequisites
 - **AWS account** – Follow these instructions to create an AWS Account: [Create an AWS Account](http://docs.aws.amazon.com/AmazonSimpleDB/latest/DeveloperGuide/AboutAWSAccounts.html)
-- **EC2 Key Pair** – Follow these instructions to create an EC2 Key Pair: [Create an EC2 Key Pair](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html#having-ec2-create-your-key-pair)
 - **GitHub OAuth Token** – Follow these instructions to create an OAuth Token: [Create a GitHub OAuth Token](https://github.com/stelligent/devops-essentials/wiki/Prerequisites#create-an-oauth-token-in-github)
 
 
@@ -52,32 +51,9 @@ This is a sample solution using a SageMaker pipeline.  This implementation could
 - **S3** – Prices Vary, depends on size of model/artifacts stored
 
 
-## Parameters
-### sagemaker.yaml
-Parameters | Description
----------- | -----------
-BucketName | The name of the S3 data bucket to be created/used.
-CommitID | The ID of the current commit.
-Environment | Current environment we are working in.
-ParentStackName | The name of the pipeline stack.
-SageMakerRole | The name of the SageMaker role.
-Timestamp | Resource timestamp to prevent naming conflicts.
-
-### pipeline.yaml
-Parameters | Description
----------- | -----------
-Email | The email where CodePipeline will send SNS notifications.
-GitHubToken | A Secret OAuthToken with access to the GitHub repo.
-GitHubUser | GitHub Username.
-Repo | The name (not URL) of the GitHub repository to pull from.
-Branch | The name (not URL) of the GitHub repository’s branch to use.
-
-
 ## Deployment Steps
 ####  Step 1. Prepare an AWS Account
-1. Create your AWS account at http://aws.amazon.com by following the instructions on the site.
-2. Ensure you are in the Northern Virginia Region (us-east-1) by selecting through the navigation bar.
-3. Create a key pair that you will use for your EC2 instances. Do this quickly by navigating to EC2 under services, choose **Key Pairs**, click **Create a Key Pair**, *type a name*, and choose **Create**.
+Create your AWS account at http://aws.amazon.com by following the instructions on the site.
 
 ####  Step 2. Launch the Stack
 Click on the **Launch Stack** button below to launch the CloudFormation Stack to set up the SageMaker Pipeline. Before Launching, ensure all architecture, configuration, etc. is set as desired.
@@ -99,6 +75,27 @@ Once the deployment has passed automated QA testing, before proceeding with the 
 **Model Training:** __ Minutes
 
 **Launch Endpoint:** __ Minutes
+
+
+## Parameters
+<!-- ### sagemaker.yaml
+Parameters | Description
+---------- | -----------
+BucketName | The name of the S3 data bucket to be created/used.
+CommitID | The ID of the current commit.
+Environment | Current environment we are working in.
+ParentStackName | The name of the pipeline stack.
+SageMakerRole | The name of the SageMaker role.
+Timestamp | Resource timestamp to prevent naming conflicts. -->
+
+<!-- ### pipeline.yaml -->
+Parameters | Description
+---------- | -----------
+Email | The email where CodePipeline will send SNS notifications.
+GitHubToken | A Secret OAuthToken with access to the GitHub repo.
+GitHubUser | GitHub Username.
+Repo | The name (not URL) of the GitHub repository to pull from.
+Branch | The name (not URL) of the GitHub repository’s branch to use.
 
 
 ## Summary
