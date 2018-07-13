@@ -62,7 +62,7 @@ Click on the **Launch Stack** button below to launch the CloudFormation Stack to
 1. The pipeline stack name is less than 20 characters long
 2. The stack is launched in the US East (N. Virginia) Region (us-east-1).
 
-[![Launch CFN stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#cstack=sn~sagemaker-stack|turl~https://s3.amazonaws.com/pmd-sm-1326-src/CodePipeline/pipeline.yaml)
+[![Launch CFN stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#cstack=sn~sagemaker-stack|turl~https://s3.amazonaws.com/sagemaker-pipeline-src/CodePipeline/pipeline.yaml)
 
 <!-- [![Launch CFN stack](https://s3.amazonaws.com/stelligent-training-public/public/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#cstack=sn~DromedaryStack|turl~https://s3.amazonaws.com/stelligent-training-public/master/dromedary-master.json) -->
 

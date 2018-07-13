@@ -1,0 +1,228 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  Creates an S3 bucket that hosts GitHub from stelligent/sagemaker-pipeline to use for Launch Stack.
+Parameters:
+  Email:
+    Description: The email address where CodePipeline sends pipeline notifications
+    Type: String
+  GitHubToken:
+    NoEcho: true
+    Description: Secret. It might look something like 9b189a1654643522561f7b3ebd44a1531a4287af OAuthToken with access to Repo. Go to https://github.com/settings/tokens
+    Type: String
+  GitHubUser:
+    Default: stelligent
+    Description: GitHub UserName
+    Type: String
+  Repo:
+    Default: sagemaker-pipeline
+    Description: GitHub Repo to pull from. Only the Name. not the URL
+    Type: String
+  Branch:
+    Default: master
+    Description: Branch to use from Repo. Only the Name. not the URL
+    Type: String
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: "Stack Settings"
+        Parameters:
+          - Email
+          - GitHubToken
+          - GitHubUser
+          - Repo
+          - Branch
+
+Resources:
+  ArtifactStoreBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${AWS::StackName}-pipeline-artifact-store
+      VersioningConfiguration:
+        Status: Enabled
+
+  SiteBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Delete
+    Properties:
+      AccessControl: PublicRead
+      BucketName: !Sub ${AWS::StackName}-src
+      WebsiteConfiguration:
+        IndexDocument: index.html
+
+  CodePipelineSNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub ${AWS::StackName}-pipeline-topic
+      Subscription:
+        - Endpoint: !Ref Email
+          Protocol: email
+          
+  CodeBuildDeploySite:
+    Type: AWS::CodeBuild::Project
+    DependsOn: CodeBuildRole
+    Properties:
+      Name: !Sub ${AWS::StackName}-DeploySite
+      Description: Deploy site to S3
+      ServiceRole: !GetAtt CodeBuildRole.Arn
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/eb-ruby-2.3-amazonlinux-64:2.1.6
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: !Sub |
+          version: 0.1
+          phases:
+            post_build:
+              commands:
+                - aws s3 cp --recursive --acl public-read ./ s3://${AWS::StackName}-src/ 
+          artifacts:
+            type: zip
+            files:
+              - '**/*'
+
+      TimeoutInMinutes: 10
+  
+ 
+  Pipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      ArtifactStore:
+        Location: !Ref 'ArtifactStoreBucket'
+        Type: S3
+      DisableInboundStageTransitions: []
+      Name: !Ref 'AWS::StackName'
+      RoleArn: !GetAtt [PipelineRole, Arn]
+      Stages:
+        - Name: Source
+          Actions:
+            - Name: Source
+              ActionTypeId:
+                Category: Source
+                Owner: ThirdParty
+                Provider: GitHub
+                Version: '1'
+              Configuration:
+                Owner: !Ref 'GitHubUser'
+                Repo: !Ref 'Repo'
+                Branch: !Ref 'Branch'
+                OAuthToken: !Ref 'GitHubToken'
+              OutputArtifacts:
+                - Name: src
+              RunOrder: '1'
+        - Name: Build_and_Train
+          Actions:
+            - Name: CopyToS3
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: '1'
+              Configuration:
+                ProjectName: !Ref CodeBuildDeploySite
+              InputArtifacts:
+                - Name: src
+              RunOrder: '1'
+ 
+  CFNRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${AWS::StackName}-cfn-role
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: ['sts:AssumeRole']
+          Effect: Allow
+          Principal:
+            Service: [cloudformation.amazonaws.com]
+        Version: '2012-10-17'
+      Path: /
+      Policies:
+        - PolicyName: CloudFormationRole
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                  - sagemaker:*
+                  - iam:PassRole
+                  - s3:*
+                Effect: Allow
+                Resource: '*'
+
+  CodeBuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${AWS::StackName}-codebuild-role
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: ['sts:AssumeRole']
+          Effect: Allow
+          Principal:
+            Service: [codebuild.amazonaws.com]
+        Version: '2012-10-17'
+      Path: /
+      Policies:
+        - PolicyName: UploadAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                - codepipeline:*
+                - sagemaker:*
+                - s3:*
+                - logs:CreateLogGroup
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+                Effect: Allow
+                Resource: '*'
+              - Action:
+                - iam:PassRole
+                Effect: Allow
+                Resource: !Sub arn:aws:iam::${AWS::AccountId}:role/${AWS::StackName}-sagemaker-role
+             
+  PipelineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${AWS::StackName}-pipeline-role
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: ['sts:AssumeRole']
+          Effect: Allow
+          Principal:
+            Service: [codepipeline.amazonaws.com]
+        Version: '2012-10-17'
+      Path: /
+      Policies:
+        - PolicyName: CodePipelineAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                - s3:*
+                - codebuild:*
+                - cloudformation:CreateStack
+                - cloudformation:DescribeStacks
+                - cloudformation:DeleteStack
+                - cloudformation:UpdateStack
+                - cloudformation:CreateChangeSet
+                - cloudformation:ExecuteChangeSet
+                - cloudformation:DeleteChangeSet
+                - cloudformation:DescribeChangeSet
+                - cloudformation:SetStackPolicy
+                - iam:PassRole
+                - sns:Publish
+                Effect: Allow
+                Resource: '*'
+
+Outputs:      
+  PipelineUrl:
+    Value: !Sub https://console.aws.amazon.com/codepipeline/home?region=${AWS::Region}#/view/${Pipeline}
+    Description: CodePipeline URL
+  LaunchStackUrl:
+    Value: !Sub https://console.aws.amazon.com/cloudformation/home?region=us-east-1#cstack=sn~sagemaker-stack|turl~https://s3.amazonaws.com/${AWS::StackName}-src/CodePipeline/pipeline.yaml
+    Description: Location of CloudFormation Template used by Launch Stack for us-east-1
+  LaunchStackMarkdownCode:
+    Value: !Sub (https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#cstack=sn~sagemaker-stack|turl~https://s3.amazonaws.com/${AWS::StackName}-src/CodePipeline/pipeline.yaml)
+    Description: Code snippet written in Markdown for launching a stack
