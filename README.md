@@ -75,7 +75,7 @@ Click on the **Launch Stack** button below to launch the CloudFormation Stack to
 Once the deployment has passed automated QA testing, before proceeding with the production stage it send an SNS request for manual approval. At this time, you may run any additional tests on the endpoint before approving it to be deployed into production.
 
 ####  Approximate Times:
-**Model Training:** __ Minutes
+**Model Training:** 8 Minutes
 
 **Launch Endpoint:** __ Minutes
 
