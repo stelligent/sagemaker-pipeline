@@ -43,12 +43,12 @@ This is a sample solution using a SageMaker pipeline.  This implementation could
 ## Costs
 - **CloudFormation** – No Additional Cost
 - **CodeBuild** – Charges per minute used. First 100 minutes each month come at no charge.
-- **CodePipeline** – $1 per month per pipeline
+- **CodePipeline** – "With AWS CodePipeline, there are no upfront fees or commitments. You pay only for what you use. AWS CodePipeline costs $1 per active pipeline* per month. To encourage experimentation, pipelines are free for the first 30 days after creation. An active pipeline is a pipeline that has existed for more than 30 days and has at least one code change that runs through it during the month. There is no charge for pipelines that have no new code changes running through them during the month. An active pipeline is not prorated for partial months." More can be found at [AWS CodePipeline Pricing](https://aws.amazon.com/codepipeline/pricing/).
 - **EC2** – Hourly prices Vary based on size/type of instance used
-- **SageMaker** – Prices vary based on EC2 instance usage for Building in Notebook Instances, Model Hosting, and Model Training; each charged per hour of use.
 - **IAM** – No Additional Cost
-- **SNS** – Realistically No Cost – Free for first 1 million SNS requests and for first 1,000 Email Deliveries each month.
+- **SageMaker** – Prices vary based on EC2 instance usage for Building in Notebook Instances, Model Hosting, and Model Training; each charged per hour of use.
 - **S3** – Prices Vary, depends on size of model/artifacts stored
+- **SNS** – Realistically No Cost – Free for first 1 million SNS requests and for first 1,000 Email Deliveries each month.
 
 
 ## Deployment Steps
