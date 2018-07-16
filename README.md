@@ -41,13 +41,13 @@ This is a sample solution using a SageMaker pipeline.  This implementation could
 
 
 ## Costs
+This section outlines cost considerations for running a SageMaker Pipeline. Running the default pipeline for 24 hours will cost roughly $1.72 including one training run, or $1.56 per day once the model is already trained.
 - **CloudFormation** – No Additional Cost
-- **CodeBuild** – Charges per minute used. First 100 minutes each month come at no charge.
+- **CodeBuild** – Charges per minute used. First 100 minutes each month come at no charge. For information on pricing beyond the first 100 minutes, see [AWS CodeBuild Pricing](https://aws.amazon.com/codebuild/pricing/).
 - **CodePipeline** – "With AWS CodePipeline, there are no upfront fees or commitments. You pay only for what you use. AWS CodePipeline costs $1 per active pipeline* per month. To encourage experimentation, pipelines are free for the first 30 days after creation. An active pipeline is a pipeline that has existed for more than 30 days and has at least one code change that runs through it during the month. There is no charge for pipelines that have no new code changes running through them during the month. An active pipeline is not prorated for partial months." More can be found at [AWS CodePipeline Pricing](https://aws.amazon.com/codepipeline/pricing/).
-- **EC2** – Hourly prices Vary based on size/type of instance used
 - **IAM** – No Additional Cost
-- **SageMaker** – Prices vary based on EC2 instance usage for Building in Notebook Instances, Model Hosting, and Model Training; each charged per hour of use. This example currently uses the `ml.p2.xlarge` for training and the `ml.t2.medium` instance for hosting. The cost for *training* with this instance is $1.26 an hour and $0.065 per hour for *hosting* with this instance. For more information, see [Amazon SageMaker Pricing](https://aws.amazon.com/sagemaker/pricing/) 
-- **S3** – Prices Vary, depends on size of model/artifacts stored
+- **SageMaker** – Prices vary based on EC2 instance usage for Building in Notebook Instances, Model Hosting, and Model Training; each charged per hour of use. This example currently uses the `ml.p2.xlarge` for training and the `ml.t2.medium` instance for hosting. The cost for *training* with this instance is $1.26 an hour and $0.065 per hour for *hosting* with this instance. For more information, see [Amazon SageMaker Pricing](https://aws.amazon.com/sagemaker/pricing/).
+- **S3** – Prices Vary, depends on size of model/artifacts stored. For first 50 TB each month, costs only $0.023 per GB stored. For more information, see [Amazon S3 Pricing](https://aws.amazon.com/s3/pricing/).
 - **SNS** – Realistically No Cost – Free for first 1 million SNS requests and for first 1,000 Email Deliveries each month.
 
 
@@ -69,7 +69,7 @@ Click on the **Launch Stack** button below to launch the CloudFormation Stack to
 
 [![Launch CFN stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#cstack=sn~sagemaker-stack|turl~https://s3.amazonaws.com/sagemaker-pipeline-src/CodePipeline/pipeline.yaml)
 
-You can launch the same stack using the AWS CLI. Here's an example: 
+You can launch the same stack using the AWS CLI. Here's an example:
 
 `aws cloudformation create-stack --stack-name YOURSTACKNAME --template-body file:///home/ec2-user/environment/sagemaker-pipeline/CodePipeline/pipeline.yaml --parameters ParameterKey=Email,ParameterValue="youremailaddress@example.com" ParameterKey=GitHubToken,ParameterValue="YOURGITHUBTOKEN12345ab1234234" --capabilities CAPABILITY_NAMED_IAM`
 
@@ -84,7 +84,7 @@ Once the deployment has passed automated QA testing, before proceeding with the 
 ####  Approximate Times:
 * **Full Pipeline**: 30 minutes
 * **Model Training:** 8 minutes
-* **Launch Endpoint:** 4minutes
+* **Launch Endpoint:** 4 minutes
 
 ## Parameters
 <!-- ### sagemaker.yaml
