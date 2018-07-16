@@ -27,14 +27,14 @@ This is a sample solution using a SageMaker pipeline.  This implementation could
 
 ## CloudFormation Templates resources
   - **AWS CloudFormation** – [AWS::CloudFormation::Interface](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cloudformation-interface.html) sets parameter group metadata.
-  - **AWS CodeBuild** – `[AWS::CodeBuild::Project](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-codebuild-project.html)` uploads the project source code stored in GitHub to an S3 bucket.
-  - **AWS CodePipeline** – `AWS::CodePipeline::Pipeline` – Easiest to create the Pipeline in the AWS Console, then use the get-pipeline CLI command to get the configuration in JSON to be placed into the CloudFormation Template.
-  - **AWS EC2** – Instance type specified in `AWS::SageMaker::EndpointConfig`
-  - **AWS SageMaker** – `AWS::SageMaker::Model` – here the algorithm to be used by SageMaker is specified, as well as the source code to be submitted to once the model has been created;
+  - **AWS CodeBuild** – [AWS::CodeBuild::Project](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-codebuild-project.html) uploads the project source code stored in GitHub to an S3 bucket.
+  - **AWS CodePipeline** – [AWS::CodePipeline::Pipeline](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-codepipeline-pipeline.html) – Easiest to create the Pipeline in the AWS Console, then use the get-pipeline CLI command to get the configuration in JSON to be placed into the CloudFormation Template.
+  - **AWS EC2** – Instance type specified in [AWS::SageMaker::EndpointConfig](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-sagemaker-endpointconfig.html)
+  - **AWS SageMaker** – [AWS::SageMaker::Model](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-sagemaker-model.html) – here the algorithm to be used by SageMaker is specified, as well as the source code to be submitted to once the model has been created;
 
-    `AWS::SageMaker::Endpoint` – this is the endpoint from which you can make requests;
+    [AWS::SageMaker::Endpoint](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-sagemaker-endpoint.html) – this is the endpoint from which you can make requests;
 
-    `AWS::SageMaker::EndpointConfig` – here we specify key configurations for the endpoint, including the type of EC2 instance used, and can specify if we would like multiple endpoint models, e.g. for A-B testing, and similarly how much/what traffic we will direct to this endpoint.
+    [AWS::SageMaker::EndpointConfig](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-sagemaker-endpointconfig.html)– here we specify key configurations for the endpoint, including the type of EC2 instance used, and can specify if we would like multiple endpoint models, e.g. for A-B testing, and similarly how much/what traffic we will direct to this endpoint.
   - **AWS IAM** – `AWS::IAM::Role` – Make sure to specify only the necessary permissions for each role.
   - **AWS SNS** – `AWS::SNS::Topic` – sends a confirmation to the email specified as a parameter.
   - **AWS S3** – `AWS::S3::Bucket` – stores the model data and necessary artifacts
