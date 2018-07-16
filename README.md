@@ -35,9 +35,9 @@ This is a sample solution using a SageMaker pipeline.  This implementation could
     [AWS::SageMaker::Endpoint](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-sagemaker-endpoint.html) – this is the endpoint from which you can make requests;
 
     [AWS::SageMaker::EndpointConfig](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-sagemaker-endpointconfig.html)– here we specify key configurations for the endpoint, including the type of EC2 instance used, and can specify if we would like multiple endpoint models, e.g. for A-B testing, and similarly how much/what traffic we will direct to this endpoint.
-  - **AWS IAM** – `AWS::IAM::Role` – Make sure to specify only the necessary permissions for each role.
-  - **AWS SNS** – `AWS::SNS::Topic` – sends a confirmation to the email specified as a parameter.
-  - **AWS S3** – `AWS::S3::Bucket` – stores the model data and necessary artifacts
+  - **AWS IAM** – [AWS::IAM::Role](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-iam-role.html) – Make sure to specify only the necessary permissions for each role.
+  - **AWS SNS** – [AWS::SNS::Topic](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-sns-topic.html) – sends a confirmation to the email specified as a parameter.
+  - **AWS S3** – [AWS::S3::Bucket](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket.html) – stores the model data and necessary artifacts
 
 
 ## Costs
