@@ -79,7 +79,7 @@ You can launch the same stack using the AWS CLI. Here's an example:
 <!-- TODO: Change above to correct URL!!! -->
 
 ####  Step 4. Test and Approve the Deployment
-Once the deployment has passed automated QA testing, before proceeding with the production stage it send an SNS request for manual approval. At this time, you may run any additional tests on the endpoint before approving it to be deployed into production.
+Once the deployment has passed automated QA testing, before proceeding with the production stage it sends an email notification (via SNS) for manual approval. At this time, you may run any additional tests on the endpoint before approving it to be deployed into production.
 
 ####  Approximate Times:
 * **Full Pipeline**: 30 minutes
