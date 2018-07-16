@@ -53,7 +53,7 @@ This is a sample solution using a SageMaker pipeline.  This implementation could
 
 ## Deployment Steps
 ####  Step 1. Prepare an AWS Account
-Create your AWS account at http://aws.amazon.com by following the instructions on the site.
+Create your AWS account at [http://aws.amazon.com](http://aws.amazon.com) by following the instructions on the site.
 
 ####  Step 2. Create a GitHub OAuth Token
 Create your token at [GitHub's Token Settings](https://github.com/settings/tokens), making sure to select scopes of **repo** and **admin:repo_hook**.  After clicking **Generate Token**, make sure to save your OAuth Token in a secure location. The token will not be shown again.
@@ -63,7 +63,9 @@ Click on the **Launch Stack** button below to launch the CloudFormation Stack to
 
 **Stack Assumptions:** The pipeline stack assumes the following conditions, and may not function properly if they are not met:
 1. The pipeline stack name is less than 20 characters long
-2. The stack is launched in the US East (N. Virginia) Region (us-east-1).
+2. The stack is launched in the US East (N. Virginia) Region (`us-east-1`).
+
+*NOTE: The URL for Launch Stack is automatically generated through a pipeline in one of Stelligent's AWS accounts.*
 
 [![Launch CFN stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#cstack=sn~sagemaker-stack|turl~https://s3.amazonaws.com/sagemaker-pipeline-src/CodePipeline/pipeline.yaml)
 
