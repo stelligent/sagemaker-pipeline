@@ -41,7 +41,7 @@ This is a sample solution using a SageMaker pipeline.  This implementation could
 
 
 ## Costs
-This section outlines cost considerations for running a SageMaker Pipeline. Running the default pipeline for 24 hours will cost roughly $1.72 including one training run, or $1.56 per day once the model is already trained.
+This section outlines cost considerations for running a SageMaker Pipeline. Running the default pipeline for 24 hours will cost roughly $1.76 including one training run, or $1.56 per day once the model is already trained.
 - **CloudFormation** – No Additional Cost
 - **CodeBuild** – Charges per minute used. First 100 minutes each month come at no charge. For information on pricing beyond the first 100 minutes, see [AWS CodeBuild Pricing](https://aws.amazon.com/codebuild/pricing/).
 - **CodePipeline** – "With AWS CodePipeline, there are no upfront fees or commitments. You pay only for what you use. AWS CodePipeline costs $1 per active pipeline* per month. To encourage experimentation, pipelines are free for the first 30 days after creation. An active pipeline is a pipeline that has existed for more than 30 days and has at least one code change that runs through it during the month. There is no charge for pipelines that have no new code changes running through them during the month. An active pipeline is not prorated for partial months." More can be found at [AWS CodePipeline Pricing](https://aws.amazon.com/codepipeline/pricing/).
