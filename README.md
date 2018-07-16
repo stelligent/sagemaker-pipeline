@@ -27,7 +27,7 @@ This is a sample solution using a SageMaker pipeline.  This implementation could
 
 ## CloudFormation Templates resources
   - **AWS CloudFormation** – [AWS::CloudFormation::Interface](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cloudformation-interface.html) sets parameter group metadata.
-  - **AWS CodeBuild** – `AWS::CodeBuild::Project` uploads the project source code stored in GitHub to an S3 bucket.
+  - **AWS CodeBuild** – `[AWS::CodeBuild::Project](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-codebuild-project.html)` uploads the project source code stored in GitHub to an S3 bucket.
   - **AWS CodePipeline** – `AWS::CodePipeline::Pipeline` – Easiest to create the Pipeline in the AWS Console, then use the get-pipeline CLI command to get the configuration in JSON to be placed into the CloudFormation Template.
   - **AWS EC2** – Instance type specified in `AWS::SageMaker::EndpointConfig`
   - **AWS SageMaker** – `AWS::SageMaker::Model` – here the algorithm to be used by SageMaker is specified, as well as the source code to be submitted to once the model has been created;
