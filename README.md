@@ -26,7 +26,7 @@ This is a sample solution using a SageMaker pipeline.  This implementation could
 
 
 ## CloudFormation Templates resources
-  - **AWS CloudFormation** – `AWS::CloudFormation::Interface` sets parameter group metadata.
+  - **AWS CloudFormation** – [AWS::CloudFormation::Interface](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cloudformation-interface.html) sets parameter group metadata.
   - **AWS CodeBuild** – `AWS::CodeBuild::Project` uploads the project source code stored in GitHub to an S3 bucket.
   - **AWS CodePipeline** – `AWS::CodePipeline::Pipeline` – Easiest to create the Pipeline in the AWS Console, then use the get-pipeline CLI command to get the configuration in JSON to be placed into the CloudFormation Template.
   - **AWS EC2** – Instance type specified in `AWS::SageMaker::EndpointConfig`
@@ -75,10 +75,9 @@ Click on the **Launch Stack** button below to launch the CloudFormation Stack to
 Once the deployment has passed automated QA testing, before proceeding with the production stage it send an SNS request for manual approval. At this time, you may run any additional tests on the endpoint before approving it to be deployed into production.
 
 ####  Approximate Times:
-**Model Training:** 8 Minutes
-
-**Launch Endpoint:** __ Minutes
-
+* **Full Pipeline**: 30 minutes
+* **Model Training:** 8 minutes
+* **Launch Endpoint:** 4minutes
 
 ## Parameters
 <!-- ### sagemaker.yaml
