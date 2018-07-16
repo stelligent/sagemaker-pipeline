@@ -83,8 +83,8 @@ Once the deployment has passed automated QA testing, before proceeding with the 
 
 ####  Approximate Times:
 * **Full Pipeline**: 30 minutes
-* **Model Training:** 8 minutes
-* **Launch Endpoint:** 4minutes
+* **Model Training:** 10 minutes
+* **Launch Endpoint:** 4 minutes
 
 ## Parameters
 <!-- ### sagemaker.yaml
