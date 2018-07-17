@@ -11,7 +11,8 @@ This is a sample solution using a SageMaker pipeline.  This implementation could
 
 ## Architecture and Implementation
 ###  Architecture Diagram
-  (TO BE CREATED)
+![app-overview](Docs/sagemaker-pipeline.png)
+
 
 
 ###  Components Details
