@@ -109,11 +109,11 @@ Branch | The name (not URL) of the GitHub repository’s branch to use.
 
 ## Using AWS Chalice to create API infront your Sagemaker Endpoint
 
-To launch a endpoint using the provide chalice project all you have to do is <!-- pip install chalice --> and then run <!-- chalice deploy --> from the Chalice directory in this repo. 
+To launch a endpoint using the provide chalice project all you have to do is <!-- pip install chalice --> and then run <!-- chalice deploy --> from the Chalice directory in this repo. Once piece that will change depending on your endpoint is the <!-- endpoint_name --> value in <!-- .chalice/config.json -->.
 
 Note this will create resource that you will manually have to delete. It will create a ApiGateway, IAM role, and a Lambda function. 
 
-For more details checkout this blog: https://medium.com/@julsimon/using-chalice-to-serve-sagemaker-predictions-a2015c02b033
+For more details checkout this blog, it's also the source for this code: https://medium.com/@julsimon/using-chalice-to-serve-sagemaker-predictions-a2015c02b033
 
 ## Summary
 After following the deployment steps, your pipeline should be up and running with a production SageMaker Endpoint that you can query to make inferences with your newly trained model!
